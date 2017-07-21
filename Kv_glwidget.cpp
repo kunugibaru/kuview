@@ -222,7 +222,6 @@ void Kv_glwidget::paintGL()
 	program_.setUniformValue("NormalMatrix", VM.normalMatrix());
 
 	program_.setUniformValue("Frame", frame_);
-
 	point_light_.position_.setX(sin(frame_ * 0.1) * 3);
 	point_light_.position_.setZ(cos(frame_ * 0.1) * 3);
 
