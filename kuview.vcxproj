@@ -89,7 +89,7 @@
     <ClCompile Include="kuview.cpp" />
     <ClCompile Include="Kv_camera.cpp" />
     <ClCompile Include="Kv_glwidget.cpp" />
-    <ClCompile Include="Kv_modelinfo_model.cpp" />
+    <ClCompile Include="Kv_sceneinfo_model.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -111,7 +111,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
     </CustomBuild>
-    <ClInclude Include="Kv_modelinfo_model.h" />
+    <ClInclude Include="Kv_sceneinfo_model.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>

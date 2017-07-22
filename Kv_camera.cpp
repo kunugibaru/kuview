@@ -1,32 +1,45 @@
 #include "stdafx.h"
 #include "Kv_camera.h"
 
-QVector3D ku::Camera::forward(bool normalize) const
+void ku::Camera::recalculate_up()
 {
-	QVector3D dir = target_ - pos_;;
-	if (normalize) {
-		dir.normalize();
-	}
-	return dir;
+	auto looking = (pos_ - target_);
+	looking.normalize();
+	auto r = QVector3D::crossProduct(looking, QVector3D(0, 1, 0));
+	up_ = QVector3D::crossProduct(r, looking);
+	up_.normalize();
 }
 
-QVector3D ku::Camera::back(bool normalize) const
+QVector3D ku::Camera::forward() const
 {
-	return -1 * forward(normalize);
+	auto front = target_ - pos_;
+	front.normalize();
+	return front;
 }
 
-QVector3D ku::Camera::left(bool normalize) const
+QVector3D ku::Camera::back() const
 {
-	QVector3D left = QVector3D::crossProduct(this->up_, this->forward());
-	if (normalize) {
-		left.normalize();
-	}
-	return left;
+	return -1 * forward();
 }
 
-QVector3D ku::Camera::right(bool normalize) const
+QVector3D ku::Camera::left() const
 {
-	return -1 * this->left(normalize);
+	return  QVector3D::crossProduct(this->up_, this->forward());
+}
+
+QVector3D ku::Camera::right() const
+{
+	return -1 * this->left();
+}
+
+const QVector3D& ku::Camera::up() const
+{
+	return this->up_;
+}
+
+QVector3D ku::Camera::down() const
+{
+	return - this->up();
 }
 
 void ku::Camera::translate(const QVector3D & angle)
@@ -36,18 +49,18 @@ void ku::Camera::translate(const QVector3D & angle)
 	this->target_ += angle * pan_speed_;
 }
 
-void ku::Camera::rotate(const float & angle)
-{
-	const QVector3D& old_dir = this->pos_ - this->target_;
-	const QVector3D& new_dir = QQuaternion::fromAxisAndAngle(this->up_, angle).rotatedVector(old_dir);
-	this->target_ = target_ + (old_dir - new_dir);
-}
-
 void ku::Camera::rotate_around_target(const float & angle)
 {
 	const QVector3D& old_dir = this->target_ - this->pos_;
-	const QVector3D& new_dir = QQuaternion::fromAxisAndAngle(this->up_, angle).rotatedVector(old_dir);
+	const QVector3D& new_dir = QQuaternion::fromAxisAndAngle(QVector3D(0, 1, 0), angle).rotatedVector(old_dir);
 	this->pos_ = pos_ + (old_dir - new_dir);
+	this->recalculate_up();
+}
+
+void ku::Camera::focus_origin()
+{
+	this->target_ = QVector3D(0, 0, 0);
+	recalculate_up();
 }
 
 void ku::Camera::update()

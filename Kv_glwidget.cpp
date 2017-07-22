@@ -122,6 +122,10 @@ Kv_glwidget::Kv_glwidget(QWidget* parent = nullptr)
 {
 	connect(&timer_, SIGNAL(timeout()), this, SLOT(update()));
 	timer_.start(16.666f);
+
+	this->setFocusPolicy(Qt::ClickFocus);
+
+	last_mouse_pos_ = this->mapFromGlobal(QCursor::pos());
 }
 
 
@@ -170,9 +174,9 @@ void Kv_glwidget::initializeGL()
 	gl->glUniform1i(program_.uniformLocation("Sampler_Normal"), 1);
 
 
-	///scene_ = ku::read_scene("D:/temps/suzanne.obj");
-	scene_ = ku::read_scene("D:/temps/sphere.obj");
-	scene_ = ku::read_scene("D:/temps/machine_01.obj");
+	
+	scene_ = ku::Scene();
+	scene_.meshes_.push_back(ku::Mesh());
 
 	scene_vao_.create();
 	scene_vao_.bind();
@@ -190,6 +194,7 @@ void Kv_glwidget::initializeGL()
 	
 	int x = 0;
 
+	qInfo() << "GL widget initialized";
 }
 
 void Kv_glwidget::resizeGL(const int w, const int h)
@@ -256,12 +261,11 @@ void Kv_glwidget::paintGL()
 	texture2_->release();
 }
 
-void Kv_glwidget::swap_model(const char * uri)
+ku::Scene Kv_glwidget::swap_model(const char * uri)
 {
 
 	scene_ = ku::read_scene(uri);
 
-	scene_vao_.create();
 	scene_vao_.bind();
 
 	const ku::Mesh& mesh = scene_.meshes_.front();
@@ -274,12 +278,66 @@ void Kv_glwidget::swap_model(const char * uri)
 	ku::init_and_set_buffer<uint32_t>(program_, index_buff_, 5, mesh.faces_, 3);
 
 	scene_vao_.release();
+
+	return scene_;
 }
 
 void Kv_glwidget::handle_user_control()
 {
-	camera_.rotate_around_target(1);
-	
-	
+	// Key board input
+	if (this->last_key_ != Qt::Key::Key_unknown) {
+		
+		switch (this->last_key_)
+		{
+		case Qt::Key_W:
+			camera_.translate(camera_.forward());
+			break;
+		case Qt::Key_A:
+			camera_.translate(camera_.left());
+			break;
+		case Qt::Key_D:
+			camera_.translate(camera_.right());
+			break;
+		case Qt::Key_S:
+			camera_.translate(camera_.back());
+			break;
+		case Qt::Key_F:
+			camera_.focus_origin();
+			break;
+		case Qt::Key_Q:
+			camera_.translate(camera_.down());
+			break;
+		case Qt::Key_E:
+			camera_.translate(camera_.up());
+			break;
+		}
 
+		this->last_key_ = Qt::Key::Key_unknown;
+	}
+	
+	// Mosue input
+	QPoint current_mouse_pos = this->mapFromGlobal(QCursor::pos());
+
+	if (this->is_left_mousebutton_pressed_ == true) {
+		QPoint mov = last_mouse_pos_ - current_mouse_pos;
+
+		camera_.rotate_around_target(mov.x());
+	}
+
+	last_mouse_pos_ = this->mapFromGlobal(QCursor::pos());
+}
+
+void Kv_glwidget::keyPressEvent(QKeyEvent * e)
+{
+	this->last_key_ = static_cast<Qt::Key>(e->key());
+}
+
+void Kv_glwidget::mousePressEvent(QMouseEvent * e)
+{
+	this->is_left_mousebutton_pressed_ = true;
+}
+
+void Kv_glwidget::mouseReleaseEvent(QMouseEvent * e)
+{
+	this->is_left_mousebutton_pressed_ = false;
 }

@@ -75,6 +75,7 @@ public:
 
         tv_modelinfo = new QTableView(centralWidget);
         tv_modelinfo->setObjectName(QStringLiteral("tv_modelinfo"));
+        tv_modelinfo->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
         verticalLayout->addWidget(tv_modelinfo);
 

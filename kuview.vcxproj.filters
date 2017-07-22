@@ -45,9 +45,6 @@
     <ClCompile Include="Kv_camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Kv_modelinfo_model.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="kuview.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -56,6 +53,9 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_kuview.cpp">
       <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Kv_sceneinfo_model.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -74,7 +74,7 @@
     <ClInclude Include="common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Kv_modelinfo_model.h">
+    <ClInclude Include="Kv_sceneinfo_model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -75,16 +75,13 @@ public:
 
 	uint32_t width_ = 0;
 	uint32_t height_ = 0;
+	Qt::Key last_key_ = Qt::Key::Key_unknown; 
+	bool is_left_mousebutton_pressed_ = false;
 
-	ku::Camera camera_;
-	ku::Point_light point_light_;
+	QPoint last_mouse_pos_;
 
-	QTimer timer_;
-
-	uint32_t frame_ = 0;
-
+	// OpenGL objects
 	QOpenGLFunctions* gl = nullptr;
-
 	QOpenGLContext* context_;
 
 	QOpenGLVertexArrayObject scene_vao_;
@@ -101,10 +98,16 @@ public:
 	QOpenGLTexture* texture1_ = nullptr;
 	QOpenGLTexture* texture2_ = nullptr;
 
+	// Scene entities
 	ku::Scene scene_;
+	ku::Camera camera_;
+	ku::Point_light point_light_;
 
-	std::map<std::string, GLuint> attrib_locs_;
-	std::map<std::string, GLuint> uniform_locs_;
+	// Uniform
+	uint32_t frame_ = 0;
+
+	QTimer timer_;
+
 
 	void initializeGL() override;
 
@@ -112,9 +115,17 @@ public:
 
 	void paintGL() override;
 
-	void swap_model(const char* uri);
+	/**
+	呼び出しもとの Widget がシーン情報を参照できるよう戻り値に。
+	*/
+	ku::Scene swap_model(const char* uri);
 
 	void handle_user_control();
 
+	void keyPressEvent(QKeyEvent* e) override;
+
+	void mousePressEvent(QMouseEvent* e) override;
+	void mouseReleaseEvent(QMouseEvent* e) override;
+	
 };
 

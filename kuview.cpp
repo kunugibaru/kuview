@@ -6,8 +6,8 @@ kuview::kuview(QWidget *parent)
 {
 	ui.setupUi(this);
 	
-	modelinfo_model_ = new Kv_modelinfo_model();
-	ui.tv_modelinfo->setModel(modelinfo_model_);
+	sceneinfo_model_ = new Kv_sceneinfo_model();
+	ui.tv_modelinfo->setModel(sceneinfo_model_);
 
 	connect(
 		ui.le_modeluri, &QLineEdit::textChanged, 
@@ -15,9 +15,13 @@ kuview::kuview(QWidget *parent)
 		
 		QFileInfo f(uri);
 		if (f.exists()) {
-			ui.glw_main->swap_model(uri.toStdString().c_str());
+			const ku::Scene& scene 
+				= ui.glw_main->swap_model(uri.toStdString().c_str());
+
+			sceneinfo_model_->change_model(scene);
+
+			
 		}
-		
 	});
 	
 	connect(ui.sb_intensity, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
@@ -29,4 +33,15 @@ kuview::kuview(QWidget *parent)
 		ui.glw_main->point_light_.ambient_ = intensity * 0.1f;
 	});
 
+	
 }
+
+void kuview::showEvent(QShowEvent * e)
+{
+	const ku::Scene& scene
+		= ui.glw_main->swap_model("D:/temps/machine_01.obj");
+	sceneinfo_model_->change_model(scene);
+
+	QMainWindow::showEvent(e);
+}
+

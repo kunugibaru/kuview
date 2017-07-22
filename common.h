@@ -19,6 +19,8 @@ namespace ku
 	struct Mesh
 	{
 		std::vector<uint32_t> faces_;
+		uint32_t material_index_;
+
 		std::vector<float> verts_;
 		std::vector<float> texcoords_;
 		std::vector<float> tangents_;
@@ -30,6 +32,7 @@ namespace ku
 	struct Scene
 	{
 		std::vector<Mesh> meshes_;
+		std::vector<std::string> materials_;
 	};
 
 	static Scene read_scene(const char* uri)
@@ -47,15 +50,23 @@ namespace ku
 		if (!scene) {
 			throw std::exception();
 		}
-
 		{
-
 			Scene out_scene;
+
+			for (int m = 0; m < scene->mNumMaterials; m++) {
+				const aiMaterial* mat = scene->mMaterials[m];
+				aiString name;
+				mat->Get(AI_MATKEY_NAME, name);
+				
+				out_scene.materials_.push_back(name.C_Str());
+			}
 
 			for (int m = 0; m < scene->mNumMeshes; m++) {
 				const aiMesh* mesh = scene->mMeshes[m];
 
 				Mesh out_mesh;
+
+				out_mesh.material_index_ = mesh->mMaterialIndex;
 
 				for (int f = 0; f < mesh->mNumFaces; f++) {
 					const auto& face = mesh->mFaces[f];
@@ -89,10 +100,9 @@ namespace ku
 					const auto ve = mesh->mTextureCoords[0][v];
 					out_mesh.texcoords_.push_back(ve.x);
 					out_mesh.texcoords_.push_back(ve.y);
-
-
-
 				}
+
+				
 
 				out_scene.meshes_.push_back(out_mesh);
 			}

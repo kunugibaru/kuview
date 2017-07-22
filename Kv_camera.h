@@ -19,21 +19,27 @@ namespace ku
 		float dolly_speed_ = 1.0f;
 		float pan_speed_ = 1.0f;
 
+		void recalculate_up();
+
 		QSize aspect_ratio_;
 
-		QVector3D forward(bool normalize = true) const;
+		QVector3D forward() const;
 
-		QVector3D back(bool normalize = true)  const;
+		QVector3D back()  const;
 
-		QVector3D left(bool normalize = true) const;
+		QVector3D left() const;
 
-		QVector3D right(bool normalize = true) const;
+		QVector3D right() const;
+
+		const QVector3D& up() const;
+
+		QVector3D down() const;
 
 		void translate(const QVector3D& angle);
 
-		void rotate(const float& angle);
-
 		void rotate_around_target(const float& angle);
+
+		void focus_origin();
 
 		void update();
 

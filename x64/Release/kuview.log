@@ -1,2 +1,6 @@
-﻿  Kv_glwidget.cpp
+﻿  moc_kuview.cpp
+  Kv_sceneinfo_model.cpp
+  kuview.cpp
+  main.cpp
+  コードを生成中...
   kuview.vcxproj -> D:\projects\laytrace\x64\Release\kuview.exe
