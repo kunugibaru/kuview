@@ -11,7 +11,7 @@
 *.dylib
 
 *.tlog
-
+/x64/
 
 # Qt-es
 

@@ -50,12 +50,6 @@ namespace ku
 			aiProcess_JoinIdenticalVertices |
 			aiProcess_SortByPType
 			);
-		/*const aiScene* scene = importer.ReadFile(uri,
-			aiProcess_CalcTangentSpace |
-			aiProcess_Triangulate |
-			aiProcess_JoinIdenticalVertices |
-			aiProcess_SortByPType
-		);*/
 
 		if (!scene) {
 			throw std::exception();

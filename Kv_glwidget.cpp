@@ -180,7 +180,7 @@ void Kv_glwidget::initializeGL()
 	gl = context_->functions();
 
 	gl->glEnable(GL_DEPTH_TEST);
-
+	
 	ku::make_shader(
 		program_, basic_vs, basic_fs
 	);
@@ -193,25 +193,27 @@ void Kv_glwidget::initializeGL()
 	program_.bind();
 
 	const char* diffusepath = "D:/temps/tex.tga";
-	//const char* diffusepath = "D:/temps/uvtemplate.tga";
+
+	const auto& create_texture = [this](
+		const char* texpath, 
+		const char* sampler_name) -> QOpenGLTexture* {
+		
+		auto* texture = new QOpenGLTexture(QImage(texpath).mirrored());
+		texture->bind();
+		texture->setMagnificationFilter(QOpenGLTexture::Linear);
+		texture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
+		texture->setWrapMode(QOpenGLTexture::Repeat);
+		gl->glUniform1i(program_.uniformLocation("Sampler_Basecolor"), 0);
+		return texture;
+	};
 
 	gl->glActiveTexture(GL_TEXTURE0);
-	texture1_ = new QOpenGLTexture(QImage(diffusepath).mirrored());
-	texture1_->bind();
-	texture1_->setMagnificationFilter(QOpenGLTexture::Linear);
-	texture1_->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
-	texture1_->setWrapMode(QOpenGLTexture::Repeat);
-	gl->glUniform1i(program_.uniformLocation("Sampler_Basecolor"), 0);
+	texture1_ = create_texture("D:/temps/tex.tga", "Sampler_Basecolor");
 
 	gl->glActiveTexture(GL_TEXTURE1);
-	texture2_ = new QOpenGLTexture(QImage("D:/temps/tesnormal.tga").mirrored());
-	texture2_->bind();
-	texture2_->setMagnificationFilter(QOpenGLTexture::Linear);
-	texture2_->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
-	texture2_->setWrapMode(QOpenGLTexture::Repeat);
-	gl->glUniform1i(program_.uniformLocation("Sampler_Normal"), 1);
+	texture2_ = create_texture("D:/temps/tesnormal.tga", "Sampler_Normal");
 
-	swap_model(":/kuview/Resources/machine_01.obj");
+	swap_model(":/kuview/Resources/sphere.obj");
 
 	qInfo() << "GL widget initialized";
 }
@@ -267,23 +269,23 @@ void Kv_glwidget::paintGL()
 
 		// ¶
 		glViewport(0, 0, width_ * 0.5, height_);
-		vattr->vao_->bind();
+		vattr->vao_.bind();
 
 		set_uniforms(program_);
 
 		gl->glDrawElements(
-			GL_TRIANGLES, scene_.meshes_.front().faces_.size(), GL_UNSIGNED_INT, (void*)0);
-		vattr->vao_->release();
+			GL_TRIANGLES, vattr->size_, GL_UNSIGNED_INT, (void*)0);
+		vattr->vao_.release();
 
 		// ‰E
 		glViewport(width_ * 0.5, 0, width_ * 0.5, height_);
 		set_uniforms(normalbuffer_program_);
 
-		vattr->vao_->bind();
+		vattr->vao_.bind();
 		gl->glDrawElements(
-			GL_TRIANGLES, scene_.meshes_.front().faces_.size(), GL_UNSIGNED_INT, (void*)0);
+			GL_TRIANGLES, vattr->size_, GL_UNSIGNED_INT, (void*)0);
 
-		vattr->vao_->release();
+		vattr->vao_.release();
 	}
 
 
@@ -302,16 +304,16 @@ ku::Scene Kv_glwidget::swap_model(const char * uri)
 	@param(data) data ‚Í std::vector<float> ‚© std::vector<uint32_t>
 	*/
 	const auto& init_and_set = [](QOpenGLShaderProgram& program,
-		QOpenGLBuffer* buffer,
+		QOpenGLBuffer& buffer,
 		const GLuint location,
 		const auto& data,
 		const uint32_t tuplesize
 		)
 	{
-		buffer->create();
-		buffer->bind();
-		buffer->allocate(data.data(), data.size() * sizeof(float));
-
+		buffer.create();
+		buffer.bind();
+		buffer.allocate(data.data(), data.size() * sizeof(float));
+		
 		program.enableAttributeArray(location);
 		program.setAttributeBuffer(location, GL_FLOAT, 0, tuplesize);
 	};
@@ -319,8 +321,8 @@ ku::Scene Kv_glwidget::swap_model(const char * uri)
 	for (size_t i = 0; i < scene_.meshes_.size(); i++) {
 		const auto& mesh = scene_.meshes_.at(i);
 		auto& vattr = std::make_unique<Vertex_buffer>();
-		vattr->vao_->create();
-		vattr->vao_->bind();
+		vattr->vao_.create();
+		vattr->vao_.bind();
 
 		init_and_set(program_, vattr->vert_buff_, 0, mesh.verts_, 3);
 		init_and_set(program_, vattr->uv_buff_, 1, mesh.texcoords_, 2);
@@ -329,7 +331,8 @@ ku::Scene Kv_glwidget::swap_model(const char * uri)
 		init_and_set(program_, vattr->bitangent_buff_, 4, mesh.bitangents_, 3);
 		init_and_set(program_, vattr->index_buff_, 5, mesh.faces_, 3);
 
-		vattr->vao_->release();
+		vattr->size_ = mesh.faces_.size();
+		vattr->vao_.release();
 
 		this->vert_buffers_.push_back(std::move(vattr));
 	}

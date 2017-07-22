@@ -63,15 +63,20 @@ public:
 
 	struct Vertex_buffer
 	{
-		QOpenGLVertexArrayObject* vao_ = new QOpenGLVertexArrayObject;
-		QOpenGLBuffer* vert_buff_ = new QOpenGLBuffer{ QOpenGLBuffer::VertexBuffer };
-		QOpenGLBuffer* uv_buff_ = new QOpenGLBuffer{ QOpenGLBuffer::VertexBuffer };
-		QOpenGLBuffer* normal_buff_ = new QOpenGLBuffer{ QOpenGLBuffer::VertexBuffer };
-		QOpenGLBuffer* tangent_buff_ = new QOpenGLBuffer{ QOpenGLBuffer::VertexBuffer };
-		QOpenGLBuffer* bitangent_buff_ = new QOpenGLBuffer{ QOpenGLBuffer::VertexBuffer };
-		QOpenGLBuffer* index_buff_ = new QOpenGLBuffer{ QOpenGLBuffer::IndexBuffer };
+		QOpenGLVertexArrayObject vao_{};
+		QOpenGLBuffer vert_buff_{ QOpenGLBuffer::VertexBuffer };
+		QOpenGLBuffer uv_buff_{ QOpenGLBuffer::VertexBuffer };
+		QOpenGLBuffer normal_buff_{ QOpenGLBuffer::VertexBuffer };
+		QOpenGLBuffer tangent_buff_{ QOpenGLBuffer::VertexBuffer };
+		QOpenGLBuffer bitangent_buff_{ QOpenGLBuffer::VertexBuffer };
+		QOpenGLBuffer index_buff_{ QOpenGLBuffer::IndexBuffer };
 
-		
+		uint32_t size_ = 0;
+
+		~Vertex_buffer()
+		{
+			qInfo() << vert_buff_.bufferId();
+		}
 	};
 
 	std::vector<std::unique_ptr<Vertex_buffer>> vert_buffers_;
