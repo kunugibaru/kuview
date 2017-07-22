@@ -39,13 +39,23 @@ namespace ku
 	{
 		using namespace Assimp;
 
+		QFile f {uri};
+		f.open(QIODevice::ReadOnly);
+		const QByteArray& data = f.readAll();
+
 		Importer importer;
-		const aiScene* scene = importer.ReadFile(uri,
+		const aiScene* scene = importer.ReadFileFromMemory(data.data(), data.size(),
 			aiProcess_CalcTangentSpace |
 			aiProcess_Triangulate |
 			aiProcess_JoinIdenticalVertices |
 			aiProcess_SortByPType
-		);
+			);
+		/*const aiScene* scene = importer.ReadFile(uri,
+			aiProcess_CalcTangentSpace |
+			aiProcess_Triangulate |
+			aiProcess_JoinIdenticalVertices |
+			aiProcess_SortByPType
+		);*/
 
 		if (!scene) {
 			throw std::exception();

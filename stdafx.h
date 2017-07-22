@@ -26,4 +26,5 @@
 #include <map>
 #include <string>
 #include <exception>
-
+#include <functional>
+#include <memory>

@@ -1,4 +1,5 @@
 <RCC>
-    <qresource prefix="kuview">
+    <qresource prefix="/kuview">
+        <file>Resources/machine_01.obj</file>
     </qresource>
 </RCC>

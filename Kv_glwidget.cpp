@@ -9,6 +9,10 @@ layout(location = 2) in vec3 vertex_normal;
 layout(location = 3) in vec3 vertex_tangent;
 layout(location = 4) in vec3 vertex_bitangent;
 
+out vec3 normal_Model;
+out vec3 bitangent_Model;
+out vec3 tangent_Model;
+
 out vec2 uv_Model;
 out vec3 position_World;
 
@@ -26,6 +30,10 @@ uniform mat4 MVP;
 uniform vec3 LightPos_World;
 
 void main(){
+	normal_Model = vertex_normal;
+	bitangent_Model = vertex_bitangent;
+	tangent_Model = vertex_tangent;
+
 	gl_Position = MVP * vec4(vertex_position, 1);
 
 	position_World = (M * vec4(vertex_position, 1)).xyz;
@@ -103,17 +111,47 @@ void main()
 
 const char* normal_fs = R"(#version 410
 in vec2 uv_Model;
+
 in vec3 normal_Model;
+in vec3 bitangent_Model;
 in vec3 tangent_Model;
+
+uniform mat4 M;
+uniform mat4 V;
+uniform mat3 NormalMatrix;
+uniform mat4 MVP;
 
 uniform sampler2D Sampler_Basecolor;
 uniform sampler2D Sampler_Normal;
 
+vec3 fixNormalSample(vec3 v, bool flipY)
+{
+	vec3 res = (v - vec3(0.5,0.5,0.5))*2.0;
+	res.y = flipY ? -res.y : res.y;
+	return res;
+}
+
 void main() {
+	vec3 normal_Tangent = normalize(texture(Sampler_Normal, uv_Model).xyz);
 
-	vec3 texture_normal_Tangent = texture(Sampler_Basecolor, uv_Model).rgb;
+	vec3 normal_World = (M * vec4(normal_Model, 1.0)).xyz;
+	vec3 bitangent_World = (M * vec4(bitangent_Model, 1.0)).xyz;
+	vec3 tangent_World = (M * vec4(tangent_Model, 1.0)).xyz;
 
-	gl_FragColor = vec4(texture_normal_Tangent, 1.0);
+	vec3 fixed_normal_World = normal_World;
+
+	if (length(normal_Tangent) > 0.0001){
+		//normal_Tangent = fixNormalSample(normal_Tangent, false);
+
+		fixed_normal_World = normalize(
+		normal_Tangent.x * tangent_World +
+		normal_Tangent.y * bitangent_World +
+		normal_Tangent.z * normal_World
+	);
+	}
+		
+
+	gl_FragColor = vec4(fixed_normal_World, 1.0);
 
 };
 	)";
@@ -138,7 +176,7 @@ void Kv_glwidget::initializeGL()
 	this->setUpdatesEnabled(true);
 
 	context_ = QOpenGLContext::currentContext();
-	
+
 	gl = context_->functions();
 
 	gl->glEnable(GL_DEPTH_TEST);
@@ -173,26 +211,7 @@ void Kv_glwidget::initializeGL()
 	texture2_->setWrapMode(QOpenGLTexture::Repeat);
 	gl->glUniform1i(program_.uniformLocation("Sampler_Normal"), 1);
 
-
-	
-	scene_ = ku::Scene();
-	scene_.meshes_.push_back(ku::Mesh());
-
-	scene_vao_.create();
-	scene_vao_.bind();
-
-	const ku::Mesh& mesh = scene_.meshes_.front();
-
-	ku::init_and_set_buffer(program_, vert_buff_, 0, mesh.verts_, 3);
-	ku::init_and_set_buffer(program_, uv_buff_, 1, mesh.texcoords_, 2);
-	ku::init_and_set_buffer(program_, normal_buff_, 2, mesh.normals_, 3);
-	ku::init_and_set_buffer(program_, tangent_buff_, 3, mesh.tangents_, 3);
-	ku::init_and_set_buffer(program_, bitangent_buff_, 4, mesh.bitangents_, 3);
-	ku::init_and_set_buffer<uint32_t>(program_, index_buff_, 5, mesh.faces_, 3);
-
-	scene_vao_.release();
-	
-	int x = 0;
+	swap_model(":/kuview/Resources/machine_01.obj");
 
 	qInfo() << "GL widget initialized";
 }
@@ -201,61 +220,72 @@ void Kv_glwidget::resizeGL(const int w, const int h)
 {
 	width_ = w;
 	height_ = h;
-	
+
 }
 
 void Kv_glwidget::paintGL()
 {
 	handle_user_control();
 
-	scene_vao_.bind();
-
 	camera_.update();
 
 	++frame_;
 
-	glViewport(0, 0, width_ * 0.5, height_);
+	const auto& set_uniforms = [this](QOpenGLShaderProgram& program) {
+		program.bind();
+		gl->glUseProgram(program.programId());
 
-	gl->glClearColor(0.2, 0.2 , 0.2, 1);
-	program_.bind();
+		program.setUniformValue("MVP", camera_.mvp());
+		program.setUniformValue("M", camera_.model());
+		program.setUniformValue("V", camera_.view());
 
-	program_.setUniformValue("MVP", camera_.mvp());
-	program_.setUniformValue("M", camera_.model());
-	program_.setUniformValue("V", camera_.view());
-	
-	const QMatrix4x4 VM = camera_.view() * camera_.model();
-	program_.setUniformValue("NormalMatrix", VM.normalMatrix());
+		const QMatrix4x4 VM = camera_.view() * camera_.model();
+		program.setUniformValue("NormalMatrix", VM.normalMatrix());
 
-	program_.setUniformValue("Frame", frame_);
-	point_light_.position_.setX(sin(frame_ * 0.1) * 3);
-	point_light_.position_.setZ(cos(frame_ * 0.1) * 3);
+		program.setUniformValue("Frame", frame_);
+		point_light_.position_.setX(sin(frame_ * 0.1) * 3);
+		point_light_.position_.setZ(cos(frame_ * 0.1) * 3);
 
-	program_.setUniformValue("LightPos_World", point_light_.position_);
-	program_.setUniformValue("LightColor", point_light_.color_);
-	program_.setUniformValue("LightPower", point_light_.intensity_);
-	program_.setUniformValue("LightAmbient", point_light_.ambient_);
+		program.setUniformValue("LightPos_World", point_light_.position_);
+		program.setUniformValue("LightColor", point_light_.color_);
+		program.setUniformValue("LightPower", point_light_.intensity_);
+		program.setUniformValue("LightAmbient", point_light_.ambient_);
 
-	gl->glUseProgram(program_.programId());
-	
-	gl->glActiveTexture(GL_TEXTURE0);
-	texture1_->bind();
-	gl->glUniform1i(program_.uniformLocation("Sampler_Basecolor"), 0);
-	gl->glActiveTexture(GL_TEXTURE1);
-	texture2_->bind();
-	gl->glUniform1i(program_.uniformLocation("Sampler_Normal"), 1);
+		gl->glActiveTexture(GL_TEXTURE0);
+		texture1_->bind();
+		gl->glUniform1i(program.uniformLocation("Sampler_Basecolor"), 0);
+		gl->glActiveTexture(GL_TEXTURE1);
+		texture2_->bind();
+		gl->glUniform1i(program.uniformLocation("Sampler_Normal"), 1);
+	};
 
-	gl->glDrawElements(
-		GL_TRIANGLES, scene_.meshes_.front().faces_.size(), GL_UNSIGNED_INT, (void*)0);
+	for (auto& vattr : this->vert_buffers_) {
+		// Clear All
+		glViewport(0, 0, width_, height_);
+		gl->glClearColor(0.2, 0.2, 0.2, 1);
 
 
-	glViewport(width_ * 0.5, 0, width_ * 0.5, height_);
-	normalbuffer_program_.bind();
-	normalbuffer_program_.setUniformValue("MVP", camera_.mvp());
-	gl->glUseProgram(normalbuffer_program_.programId());
-	gl->glDrawElements(
-		GL_TRIANGLES, scene_.meshes_.front().faces_.size(), GL_UNSIGNED_INT, (void*)0);
+		// ¶
+		glViewport(0, 0, width_ * 0.5, height_);
+		vattr->vao_->bind();
 
-	scene_vao_.release();
+		set_uniforms(program_);
+
+		gl->glDrawElements(
+			GL_TRIANGLES, scene_.meshes_.front().faces_.size(), GL_UNSIGNED_INT, (void*)0);
+		vattr->vao_->release();
+
+		// ‰E
+		glViewport(width_ * 0.5, 0, width_ * 0.5, height_);
+		set_uniforms(normalbuffer_program_);
+
+		vattr->vao_->bind();
+		gl->glDrawElements(
+			GL_TRIANGLES, scene_.meshes_.front().faces_.size(), GL_UNSIGNED_INT, (void*)0);
+
+		vattr->vao_->release();
+	}
+
 
 	texture1_->release();
 	texture2_->release();
@@ -266,18 +296,43 @@ ku::Scene Kv_glwidget::swap_model(const char * uri)
 
 	scene_ = ku::read_scene(uri);
 
-	scene_vao_.bind();
+	this->vert_buffers_.clear();
 
-	const ku::Mesh& mesh = scene_.meshes_.front();
+	/**
+	@param(data) data ‚Í std::vector<float> ‚© std::vector<uint32_t>
+	*/
+	const auto& init_and_set = [](QOpenGLShaderProgram& program,
+		QOpenGLBuffer* buffer,
+		const GLuint location,
+		const auto& data,
+		const uint32_t tuplesize
+		)
+	{
+		buffer->create();
+		buffer->bind();
+		buffer->allocate(data.data(), data.size() * sizeof(float));
 
-	ku::init_and_set_buffer(program_, vert_buff_, 0, mesh.verts_, 3);
-	ku::init_and_set_buffer(program_, uv_buff_, 1, mesh.texcoords_, 2);
-	ku::init_and_set_buffer(program_, normal_buff_, 2, mesh.normals_, 3);
-	ku::init_and_set_buffer(program_, tangent_buff_, 3, mesh.tangents_, 3);
-	ku::init_and_set_buffer(program_, bitangent_buff_, 4, mesh.bitangents_, 3);
-	ku::init_and_set_buffer<uint32_t>(program_, index_buff_, 5, mesh.faces_, 3);
+		program.enableAttributeArray(location);
+		program.setAttributeBuffer(location, GL_FLOAT, 0, tuplesize);
+	};
 
-	scene_vao_.release();
+	for (size_t i = 0; i < scene_.meshes_.size(); i++) {
+		const auto& mesh = scene_.meshes_.at(i);
+		auto& vattr = std::make_unique<Vertex_buffer>();
+		vattr->vao_->create();
+		vattr->vao_->bind();
+
+		init_and_set(program_, vattr->vert_buff_, 0, mesh.verts_, 3);
+		init_and_set(program_, vattr->uv_buff_, 1, mesh.texcoords_, 2);
+		init_and_set(program_, vattr->normal_buff_, 2, mesh.normals_, 3);
+		init_and_set(program_, vattr->tangent_buff_, 3, mesh.tangents_, 3);
+		init_and_set(program_, vattr->bitangent_buff_, 4, mesh.bitangents_, 3);
+		init_and_set(program_, vattr->index_buff_, 5, mesh.faces_, 3);
+
+		vattr->vao_->release();
+
+		this->vert_buffers_.push_back(std::move(vattr));
+	}
 
 	return scene_;
 }
@@ -286,7 +341,7 @@ void Kv_glwidget::handle_user_control()
 {
 	// Key board input
 	if (this->last_key_ != Qt::Key::Key_unknown) {
-		
+
 		switch (this->last_key_)
 		{
 		case Qt::Key_W:
@@ -314,7 +369,7 @@ void Kv_glwidget::handle_user_control()
 
 		this->last_key_ = Qt::Key::Key_unknown;
 	}
-	
+
 	// Mosue input
 	QPoint current_mouse_pos = this->mapFromGlobal(QCursor::pos());
 

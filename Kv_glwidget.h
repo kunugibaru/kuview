@@ -13,26 +13,6 @@ namespace ku
 		ShaderCompilationError(const char* msg) : std::exception(msg) {}
 	};
 
-	/**
-	tuplesize: num of components per vertex
-	*/
-	template<typename N = float>
-	static void init_and_set_buffer(
-		QOpenGLShaderProgram& program,
-		QOpenGLBuffer& buffer,
-		const GLuint location,
-		const std::vector<N>& data,
-		const uint32_t tuplesize
-	)
-	{
-		buffer.create();
-		buffer.bind();
-		buffer.allocate(data.data(), data.size() * sizeof(float));
-
-		program.enableAttributeArray(location);
-		program.setAttributeBuffer(location, GL_FLOAT, 0, tuplesize);
-	}
-
 	static void make_shader(
 		QOpenGLShaderProgram& program,
 		const char* vs,
@@ -60,10 +40,7 @@ namespace ku
 		float intensity_ = 10;
 		float ambient_ = 0.1;
 	};
-
-
 }
-
 
 
 class Kv_glwidget :
@@ -84,13 +61,20 @@ public:
 	QOpenGLFunctions* gl = nullptr;
 	QOpenGLContext* context_;
 
-	QOpenGLVertexArrayObject scene_vao_;
-	QOpenGLBuffer vert_buff_{ QOpenGLBuffer::VertexBuffer };
-	QOpenGLBuffer uv_buff_{ QOpenGLBuffer::VertexBuffer };
-	QOpenGLBuffer normal_buff_{ QOpenGLBuffer::VertexBuffer };
-	QOpenGLBuffer tangent_buff_{ QOpenGLBuffer::VertexBuffer };
-	QOpenGLBuffer bitangent_buff_{ QOpenGLBuffer::VertexBuffer };
-	QOpenGLBuffer index_buff_{ QOpenGLBuffer::IndexBuffer };
+	struct Vertex_buffer
+	{
+		QOpenGLVertexArrayObject* vao_ = new QOpenGLVertexArrayObject;
+		QOpenGLBuffer* vert_buff_ = new QOpenGLBuffer{ QOpenGLBuffer::VertexBuffer };
+		QOpenGLBuffer* uv_buff_ = new QOpenGLBuffer{ QOpenGLBuffer::VertexBuffer };
+		QOpenGLBuffer* normal_buff_ = new QOpenGLBuffer{ QOpenGLBuffer::VertexBuffer };
+		QOpenGLBuffer* tangent_buff_ = new QOpenGLBuffer{ QOpenGLBuffer::VertexBuffer };
+		QOpenGLBuffer* bitangent_buff_ = new QOpenGLBuffer{ QOpenGLBuffer::VertexBuffer };
+		QOpenGLBuffer* index_buff_ = new QOpenGLBuffer{ QOpenGLBuffer::IndexBuffer };
+
+		
+	};
+
+	std::vector<std::unique_ptr<Vertex_buffer>> vert_buffers_;
 
 	QOpenGLShaderProgram program_;
 	QOpenGLShaderProgram normalbuffer_program_;

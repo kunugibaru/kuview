@@ -21,25 +21,25 @@
 QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
-struct qt_meta_stringdata_kuview_t {
+struct qt_meta_stringdata_QtPrivate__kuview_t {
     QByteArrayData data[1];
-    char stringdata0[7];
+    char stringdata0[18];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_kuview_t, stringdata0) + ofs \
+    qptrdiff(offsetof(qt_meta_stringdata_QtPrivate__kuview_t, stringdata0) + ofs \
         - idx * sizeof(QByteArrayData)) \
     )
-static const qt_meta_stringdata_kuview_t qt_meta_stringdata_kuview = {
+static const qt_meta_stringdata_QtPrivate__kuview_t qt_meta_stringdata_QtPrivate__kuview = {
     {
-QT_MOC_LITERAL(0, 0, 6) // "kuview"
+QT_MOC_LITERAL(0, 0, 17) // "QtPrivate::kuview"
 
     },
-    "kuview"
+    "QtPrivate::kuview"
 };
 #undef QT_MOC_LITERAL
 
-static const uint qt_meta_data_kuview[] = {
+static const uint qt_meta_data_QtPrivate__kuview[] = {
 
  // content:
        7,       // revision
@@ -55,7 +55,7 @@ static const uint qt_meta_data_kuview[] = {
        0        // eod
 };
 
-void kuview::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void QtPrivate::kuview::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     Q_UNUSED(_o);
     Q_UNUSED(_id);
@@ -63,26 +63,26 @@ void kuview::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
     Q_UNUSED(_a);
 }
 
-const QMetaObject kuview::staticMetaObject = {
-    { &QMainWindow::staticMetaObject, qt_meta_stringdata_kuview.data,
-      qt_meta_data_kuview,  qt_static_metacall, nullptr, nullptr}
+const QMetaObject QtPrivate::kuview::staticMetaObject = {
+    { &QMainWindow::staticMetaObject, qt_meta_stringdata_QtPrivate__kuview.data,
+      qt_meta_data_QtPrivate__kuview,  qt_static_metacall, nullptr, nullptr}
 };
 
 
-const QMetaObject *kuview::metaObject() const
+const QMetaObject *QtPrivate::kuview::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *kuview::qt_metacast(const char *_clname)
+void *QtPrivate::kuview::qt_metacast(const char *_clname)
 {
     if (!_clname) return nullptr;
-    if (!strcmp(_clname, qt_meta_stringdata_kuview.stringdata0))
+    if (!strcmp(_clname, qt_meta_stringdata_QtPrivate__kuview.stringdata0))
         return static_cast<void*>(const_cast< kuview*>(this));
     return QMainWindow::qt_metacast(_clname);
 }
 
-int kuview::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int QtPrivate::kuview::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QMainWindow::qt_metacall(_c, _id, _a);
     return _id;

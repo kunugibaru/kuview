@@ -39,7 +39,7 @@ kuview::kuview(QWidget *parent)
 void kuview::showEvent(QShowEvent * e)
 {
 	const ku::Scene& scene
-		= ui.glw_main->swap_model("D:/temps/machine_01.obj");
+		= ui.glw_main->swap_model(":/kuview/Resources/machine_01.obj");
 	sceneinfo_model_->change_model(scene);
 
 	QMainWindow::showEvent(e);
