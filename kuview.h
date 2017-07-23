@@ -3,6 +3,7 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_kuview.h"
 #include "Kv_sceneinfo_model.h"
+#include "common.h"
 
 class kuview : public QMainWindow
 {

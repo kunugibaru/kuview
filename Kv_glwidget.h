@@ -24,6 +24,7 @@ public:
 	Kv_glwidget(QWidget* parent);
 	~Kv_glwidget();
 
+	// ユーザーコントロール関連
 	uint32_t width_ = 0;
 	uint32_t height_ = 0;
 	Qt::Key last_key_ = Qt::Key::Key_unknown; 
@@ -31,7 +32,7 @@ public:
 
 	QPoint last_mouse_pos_;
 
-	// OpenGL objects
+	// OpenGL オブジェクト
 	QOpenGLFunctions* gl = nullptr;
 	QOpenGLContext* context_;
 
@@ -56,7 +57,17 @@ public:
 	QOpenGLTexture* texture1_ = nullptr;
 	QOpenGLTexture* texture2_ = nullptr;
 
-	// Scene entities
+	/**
+	ユーザーが書き換えたシェーダーをコンパイルして一時的にメンバーに格納する。
+	メインスレッドでリンクする。
+	*/
+	bool fs_changed_ = false;
+	QOpenGLShader* user_fs_;
+
+	bool model_changed_ = false;
+	QString model_uri_;
+
+	// エンティティ
 	ku::Scene scene_;
 	ku::Camera camera_;
 
@@ -94,5 +105,6 @@ public:
 	void mousePressEvent(QMouseEvent* e) override;
 	void mouseReleaseEvent(QMouseEvent* e) override;
 	
+	QString shader_change(const QString& source);
 };
 

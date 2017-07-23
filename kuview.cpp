@@ -15,8 +15,10 @@ kuview::kuview(QWidget *parent)
 		
 		QFileInfo f(uri);
 		if (f.exists()) {
-			const ku::Scene& scene 
-				= ui.glw_main->swap_model(uri.toStdString().c_str());
+			ui.glw_main->model_changed_ = true;
+			ui.glw_main->model_uri_ = uri;
+
+			const auto& scene = ku::read_scene(uri.toStdString().c_str());
 
 			sceneinfo_model_->change_model(scene);
 
@@ -34,13 +36,22 @@ kuview::kuview(QWidget *parent)
 		ui.glw_main->point_light_.ambient_ = intensity * 0.1f;
 	});
 
-	
+	connect(
+		ui.te_fs, &QPlainTextEdit::textChanged, 
+		[this]() {
+		
+		const QString& log = 
+			ui.glw_main->shader_change(ui.te_fs->toPlainText().toStdString().c_str());
+		
+		this->ui.te_log->setPlainText(log);
+	});
+	this->ui.te_fs->setPlainText(ku::normal_fs);
 }
 
 void kuview::showEvent(QShowEvent * e)
 {
 	ku::Scene scene
-		= ui.glw_main->swap_model(":/kuview/Resources/machine_01.obj");
+		= ui.glw_main->swap_model(":/kuview/Resources/sphere.obj");
 	sceneinfo_model_->change_model(scene);
 
 	QMainWindow::showEvent(e);

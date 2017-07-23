@@ -20,6 +20,7 @@
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
+#include <QtWidgets/QPlainTextEdit>
 #include <QtWidgets/QSpinBox>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTableView>
@@ -37,13 +38,23 @@ public:
     QHBoxLayout *horizontalLayout_3;
     QVBoxLayout *verticalLayout;
     Kv_glwidget *glw_main;
+    QFormLayout *formLayout_2;
     QLineEdit *le_modeluri;
+    QLabel *label_2;
+    QLineEdit *le_normal;
+    QLabel *label_3;
+    QLineEdit *le_diffuse;
+    QLabel *label_4;
+    QLineEdit *le_specular;
+    QLabel *label_5;
     QTableView *tv_modelinfo;
+    QPlainTextEdit *te_log;
     QFormLayout *formLayout;
     QLabel *lbl_intensity;
     QSpinBox *sb_intensity;
     QSpinBox *sb_ambient;
     QLabel *label;
+    QPlainTextEdit *te_fs;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -52,7 +63,7 @@ public:
     {
         if (kuviewClass->objectName().isEmpty())
             kuviewClass->setObjectName(QStringLiteral("kuviewClass"));
-        kuviewClass->resize(1145, 881);
+        kuviewClass->resize(1429, 881);
         centralWidget = new QWidget(kuviewClass);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         horizontalLayout_3 = new QHBoxLayout(centralWidget);
@@ -68,16 +79,63 @@ public:
 
         verticalLayout->addWidget(glw_main);
 
+        formLayout_2 = new QFormLayout();
+        formLayout_2->setSpacing(6);
+        formLayout_2->setObjectName(QStringLiteral("formLayout_2"));
         le_modeluri = new QLineEdit(centralWidget);
         le_modeluri->setObjectName(QStringLiteral("le_modeluri"));
 
-        verticalLayout->addWidget(le_modeluri);
+        formLayout_2->setWidget(1, QFormLayout::FieldRole, le_modeluri);
+
+        label_2 = new QLabel(centralWidget);
+        label_2->setObjectName(QStringLiteral("label_2"));
+
+        formLayout_2->setWidget(1, QFormLayout::LabelRole, label_2);
+
+        le_normal = new QLineEdit(centralWidget);
+        le_normal->setObjectName(QStringLiteral("le_normal"));
+
+        formLayout_2->setWidget(4, QFormLayout::FieldRole, le_normal);
+
+        label_3 = new QLabel(centralWidget);
+        label_3->setObjectName(QStringLiteral("label_3"));
+
+        formLayout_2->setWidget(4, QFormLayout::LabelRole, label_3);
+
+        le_diffuse = new QLineEdit(centralWidget);
+        le_diffuse->setObjectName(QStringLiteral("le_diffuse"));
+
+        formLayout_2->setWidget(2, QFormLayout::FieldRole, le_diffuse);
+
+        label_4 = new QLabel(centralWidget);
+        label_4->setObjectName(QStringLiteral("label_4"));
+
+        formLayout_2->setWidget(2, QFormLayout::LabelRole, label_4);
+
+        le_specular = new QLineEdit(centralWidget);
+        le_specular->setObjectName(QStringLiteral("le_specular"));
+
+        formLayout_2->setWidget(3, QFormLayout::FieldRole, le_specular);
+
+        label_5 = new QLabel(centralWidget);
+        label_5->setObjectName(QStringLiteral("label_5"));
+
+        formLayout_2->setWidget(3, QFormLayout::LabelRole, label_5);
+
+
+        verticalLayout->addLayout(formLayout_2);
 
         tv_modelinfo = new QTableView(centralWidget);
         tv_modelinfo->setObjectName(QStringLiteral("tv_modelinfo"));
         tv_modelinfo->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
         verticalLayout->addWidget(tv_modelinfo);
+
+        te_log = new QPlainTextEdit(centralWidget);
+        te_log->setObjectName(QStringLiteral("te_log"));
+        te_log->setReadOnly(true);
+
+        verticalLayout->addWidget(te_log);
 
 
         horizontalLayout_3->addLayout(verticalLayout);
@@ -112,10 +170,16 @@ public:
 
         horizontalLayout_3->addLayout(formLayout);
 
+        te_fs = new QPlainTextEdit(centralWidget);
+        te_fs->setObjectName(QStringLiteral("te_fs"));
+        te_fs->setMinimumSize(QSize(600, 0));
+
+        horizontalLayout_3->addWidget(te_fs);
+
         kuviewClass->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(kuviewClass);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1145, 21));
+        menuBar->setGeometry(QRect(0, 0, 1429, 21));
         kuviewClass->setMenuBar(menuBar);
         mainToolBar = new QToolBar(kuviewClass);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
@@ -132,6 +196,10 @@ public:
     void retranslateUi(QMainWindow *kuviewClass)
     {
         kuviewClass->setWindowTitle(QApplication::translate("kuviewClass", "kuview", Q_NULLPTR));
+        label_2->setText(QApplication::translate("kuviewClass", "Model Path", Q_NULLPTR));
+        label_3->setText(QApplication::translate("kuviewClass", "Normal Map", Q_NULLPTR));
+        label_4->setText(QApplication::translate("kuviewClass", "Diffuse Map", Q_NULLPTR));
+        label_5->setText(QApplication::translate("kuviewClass", "Specular Map", Q_NULLPTR));
         lbl_intensity->setText(QApplication::translate("kuviewClass", "Light Intensity", Q_NULLPTR));
         label->setText(QApplication::translate("kuviewClass", "Ambient(x0.01)", Q_NULLPTR));
     } // retranslateUi
