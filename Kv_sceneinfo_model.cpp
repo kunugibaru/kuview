@@ -77,20 +77,13 @@ QVariant Kv_sceneinfo_model::data(const QModelIndex &index, int role) const
 
 void Kv_sceneinfo_model::change_model(const ku::Scene& scene)
 {
-	
-	/*this->beginResetModel();
-	this->endResetModel();*/
-
 	this->beginResetModel();
 	
 	records_.clear();
 
-	
-
 	for (size_t i = 0; i < scene.meshes_.size(); i++) {
 		Record record;
 		
-
 		const ku::Mesh& mesh = scene.meshes_.at(i);
 
 		if (scene.materials_.size() > 0) {
@@ -106,6 +99,4 @@ void Kv_sceneinfo_model::change_model(const ku::Scene& scene)
 	}
 
 	this->endResetModel();
-
-	qInfo() << "model changed";
 }

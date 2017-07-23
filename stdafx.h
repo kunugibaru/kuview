@@ -17,7 +17,7 @@
 #include <QVector>
 #include <QTimer>
 
-
+#include <qopenglfunctions_4_5_core.h>
 
 //#include <Qt3DRender/QSceneLoader>
 

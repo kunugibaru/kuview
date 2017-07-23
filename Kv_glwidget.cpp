@@ -158,6 +158,7 @@ void main() {
 
 Kv_glwidget::Kv_glwidget(QWidget* parent = nullptr)
 {
+
 	connect(&timer_, SIGNAL(timeout()), this, SLOT(update()));
 	timer_.start(16.666f);
 
@@ -181,39 +182,47 @@ void Kv_glwidget::initializeGL()
 
 	gl->glEnable(GL_DEPTH_TEST);
 	
-	ku::make_shader(
-		program_, basic_vs, basic_fs
-	);
+	{
+		const auto& form = context_->format();
 
-	ku::make_shader(
-		normalbuffer_program_, basic_vs, normal_fs
-	);
+		qInfo() << form.version();
+	}
+	
 
-	program_.link();
-	program_.bind();
+	const auto& make_shader = [](
+		QOpenGLShaderProgram& program,
+		const char* vs,
+		const char* fs) {
+	
+		bool result = true;
+		result = program.addShaderFromSourceCode(QOpenGLShader::Vertex, vs);
 
-	const char* diffusepath = "D:/temps/tex.tga";
+		if (!result) {
+			throw ku::ShaderCompilationError(program.log().toStdString().c_str());
+		}
 
-	const auto& create_texture = [this](
-		const char* texpath, 
-		const char* sampler_name) -> QOpenGLTexture* {
+		result = program.addShaderFromSourceCode(QOpenGLShader::Fragment, fs);
+		if (!result) {
+			throw ku::ShaderCompilationError(program.log().toStdString().c_str());
+		}
+		program.link();
+	};
+	
+	make_shader(program_, basic_vs, basic_fs);
+	make_shader(normalbuffer_program_, basic_vs, normal_fs);
+
+	const auto& create_texture = [this](const char* texpath) -> QOpenGLTexture* {
 		
 		auto* texture = new QOpenGLTexture(QImage(texpath).mirrored());
 		texture->bind();
 		texture->setMagnificationFilter(QOpenGLTexture::Linear);
 		texture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
 		texture->setWrapMode(QOpenGLTexture::Repeat);
-		gl->glUniform1i(program_.uniformLocation("Sampler_Basecolor"), 0);
 		return texture;
 	};
 
-	gl->glActiveTexture(GL_TEXTURE0);
-	texture1_ = create_texture("D:/temps/tex.tga", "Sampler_Basecolor");
-
-	gl->glActiveTexture(GL_TEXTURE1);
-	texture2_ = create_texture("D:/temps/tesnormal.tga", "Sampler_Normal");
-
-	swap_model(":/kuview/Resources/sphere.obj");
+	texture1_ = create_texture("D:/temps/tex.tga");
+	texture2_ = create_texture("D:/temps/tesnormal.tga");
 
 	qInfo() << "GL widget initialized";
 }
@@ -269,23 +278,21 @@ void Kv_glwidget::paintGL()
 
 		// ¶
 		glViewport(0, 0, width_ * 0.5, height_);
-		vattr->vao_.bind();
+		//vattr->vao_.bind();
 
 		set_uniforms(program_);
 
 		gl->glDrawElements(
 			GL_TRIANGLES, vattr->size_, GL_UNSIGNED_INT, (void*)0);
-		vattr->vao_.release();
-
+		
 		// ‰E
 		glViewport(width_ * 0.5, 0, width_ * 0.5, height_);
 		set_uniforms(normalbuffer_program_);
 
-		vattr->vao_.bind();
 		gl->glDrawElements(
 			GL_TRIANGLES, vattr->size_, GL_UNSIGNED_INT, (void*)0);
 
-		vattr->vao_.release();
+		//vattr->vao_.release();
 	}
 
 
@@ -298,44 +305,53 @@ ku::Scene Kv_glwidget::swap_model(const char * uri)
 
 	scene_ = ku::read_scene(uri);
 
+	
+
 	this->vert_buffers_.clear();
 
 	/**
 	@param(data) data ‚Í std::vector<float> ‚© std::vector<uint32_t>
 	*/
-	const auto& init_and_set = [](QOpenGLShaderProgram& program,
+	const auto& init_and_set = [this](
 		QOpenGLBuffer& buffer,
-		const GLuint location,
+		const GLuint index,
 		const auto& data,
+		const GLenum typ,
 		const uint32_t tuplesize
 		)
 	{
 		buffer.create();
 		buffer.bind();
-		buffer.allocate(data.data(), data.size() * sizeof(float));
+		gl->glBufferData(buffer.type(), sizeof(float) * data.size(), 0, GL_STATIC_DRAW);
+		gl->glBufferSubData(buffer.type(), 0, sizeof(float) * data.size(), data.data());
 		
-		program.enableAttributeArray(location);
-		program.setAttributeBuffer(location, GL_FLOAT, 0, tuplesize);
+		gl->glEnableVertexAttribArray(index);
+		gl->glVertexAttribPointer(index, tuplesize, typ, GL_TRUE, 0, (void*)0);
 	};
 
 	for (size_t i = 0; i < scene_.meshes_.size(); i++) {
 		const auto& mesh = scene_.meshes_.at(i);
 		auto& vattr = std::make_unique<Vertex_buffer>();
-		vattr->vao_.create();
+		
 		vattr->vao_.bind();
 
-		init_and_set(program_, vattr->vert_buff_, 0, mesh.verts_, 3);
-		init_and_set(program_, vattr->uv_buff_, 1, mesh.texcoords_, 2);
-		init_and_set(program_, vattr->normal_buff_, 2, mesh.normals_, 3);
-		init_and_set(program_, vattr->tangent_buff_, 3, mesh.tangents_, 3);
-		init_and_set(program_, vattr->bitangent_buff_, 4, mesh.bitangents_, 3);
-		init_and_set(program_, vattr->index_buff_, 5, mesh.faces_, 3);
+		init_and_set(vattr->vert_buff_, 0, mesh.verts_, GL_FLOAT, 3);
+		init_and_set(vattr->uv_buff_, 1, mesh.texcoords_, GL_FLOAT, 2);
+		init_and_set(vattr->normal_buff_, 2, mesh.normals_, GL_FLOAT, 3);
+		init_and_set(vattr->tangent_buff_, 3, mesh.tangents_, GL_FLOAT, 3);
+		init_and_set(vattr->bitangent_buff_, 4, mesh.bitangents_, GL_FLOAT, 3);
+		init_and_set(vattr->index_buff_, 5, mesh.faces_, GL_UNSIGNED_INT, 3);
 
 		vattr->size_ = mesh.faces_.size();
 		vattr->vao_.release();
 
+		qInfo() << vattr->vao_.objectId() << ", " << vattr->vert_buff_.bufferId() 
+			<< mesh.verts_.front() ;
+
 		this->vert_buffers_.push_back(std::move(vattr));
 	}
+
+	
 
 	return scene_;
 }

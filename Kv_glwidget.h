@@ -13,33 +13,7 @@ namespace ku
 		ShaderCompilationError(const char* msg) : std::exception(msg) {}
 	};
 
-	static void make_shader(
-		QOpenGLShaderProgram& program,
-		const char* vs,
-		const char* fs
-	)
-	{
-		bool result = true;
-		result = program.addShaderFromSourceCode(QOpenGLShader::Vertex, vs);
-
-		if (!result) {
-			throw ShaderCompilationError(program.log().toStdString().c_str());
-		}
-
-		result = program.addShaderFromSourceCode(QOpenGLShader::Fragment, fs);
-		if (!result) {
-			throw ShaderCompilationError(program.log().toStdString().c_str());
-		}
-		program.link();
-	}
-
-	struct Point_light
-	{
-		QVector3D position_{ 1,5,3 };
-		QVector3D color_{ 1,1,1 };
-		float intensity_ = 10;
-		float ambient_ = 0.1;
-	};
+	
 }
 
 
@@ -72,11 +46,6 @@ public:
 		QOpenGLBuffer index_buff_{ QOpenGLBuffer::IndexBuffer };
 
 		uint32_t size_ = 0;
-
-		~Vertex_buffer()
-		{
-			qInfo() << vert_buff_.bufferId();
-		}
 	};
 
 	std::vector<std::unique_ptr<Vertex_buffer>> vert_buffers_;
@@ -90,7 +59,16 @@ public:
 	// Scene entities
 	ku::Scene scene_;
 	ku::Camera camera_;
-	ku::Point_light point_light_;
+
+	struct Point_light
+	{
+		QVector3D position_{ 1,5,3 };
+		QVector3D color_{ 1,1,1 };
+		float intensity_ = 10;
+		float ambient_ = 0.1;
+	};
+
+	Point_light point_light_;
 
 	// Uniform
 	uint32_t frame_ = 0;

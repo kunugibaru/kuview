@@ -42,6 +42,7 @@ namespace ku
 		QFile f {uri};
 		f.open(QIODevice::ReadOnly);
 		const QByteArray& data = f.readAll();
+		f.close();
 
 		Importer importer;
 		const aiScene* scene = importer.ReadFileFromMemory(data.data(), data.size(),

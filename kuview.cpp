@@ -28,6 +28,7 @@ kuview::kuview(QWidget *parent)
 		[&](const int intensity) {
 		ui.glw_main->point_light_.intensity_ = intensity;
 	});
+
 	connect(ui.sb_ambient, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
 		[&](const int intensity) {
 		ui.glw_main->point_light_.ambient_ = intensity * 0.1f;
@@ -38,7 +39,13 @@ kuview::kuview(QWidget *parent)
 
 void kuview::showEvent(QShowEvent * e)
 {
-	const ku::Scene& scene
+	ku::Scene scene
+		= ui.glw_main->swap_model(":/kuview/Resources/machine_01.obj");
+	
+	scene
+		= ui.glw_main->swap_model(":/kuview/Resources/sphere.obj");
+
+	scene
 		= ui.glw_main->swap_model(":/kuview/Resources/machine_01.obj");
 	sceneinfo_model_->change_model(scene);
 
