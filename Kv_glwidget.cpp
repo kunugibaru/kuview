@@ -270,7 +270,7 @@ void Kv_glwidget::paintGL()
 		gl->glUniform1i(program.uniformLocation("Sampler_Normal"), 1);
 	};
 
-	for (auto& vattr : this->vert_buffers_) {
+	for (const auto& vattr : this->vert_buffers_) {
 		// Clear All
 		glViewport(0, 0, width_, height_);
 		gl->glClearColor(0.2, 0.2, 0.2, 1);
@@ -344,9 +344,6 @@ ku::Scene Kv_glwidget::swap_model(const char * uri)
 
 		vattr->size_ = mesh.faces_.size();
 		vattr->vao_.release();
-
-		qInfo() << vattr->vao_.objectId() << ", " << vattr->vert_buff_.bufferId() 
-			<< mesh.verts_.front() ;
 
 		this->vert_buffers_.push_back(std::move(vattr));
 	}

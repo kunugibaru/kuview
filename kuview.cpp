@@ -41,12 +41,6 @@ void kuview::showEvent(QShowEvent * e)
 {
 	ku::Scene scene
 		= ui.glw_main->swap_model(":/kuview/Resources/machine_01.obj");
-	
-	scene
-		= ui.glw_main->swap_model(":/kuview/Resources/sphere.obj");
-
-	scene
-		= ui.glw_main->swap_model(":/kuview/Resources/machine_01.obj");
 	sceneinfo_model_->change_model(scene);
 
 	QMainWindow::showEvent(e);
