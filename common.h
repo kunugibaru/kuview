@@ -86,6 +86,8 @@ in vec3 eyedirection_Tangent;
 
 uniform sampler2D Sampler_Basecolor;
 uniform sampler2D Sampler_Normal;
+uniform sampler2D Sampler_Roughness;
+uniform sampler2D Sampler_Metallic;
 
 uniform vec3 LightPos_World;
 uniform vec3 LightColor;
@@ -124,9 +126,8 @@ void main()
 
 	static const char* normal_fs = R"(#version 410
 
-#define M_INV_PI 0.31830988618379067153776752674503
-#define M_PI 3.1415926535897932384626433832795
-#define DISTANCE_ATTENUATION_MULT 0.001
+#define INVERSED_PI 0.3183
+#define PI 3.1415
 
 in vec3 normal_Model;
 in vec3 bitangent_Model;
@@ -148,6 +149,8 @@ uniform mat4 MVP;
 
 uniform sampler2D Sampler_Basecolor;
 uniform sampler2D Sampler_Normal;
+uniform sampler2D Sampler_Roughness;
+uniform sampler2D Sampler_Metallic;
 
 uniform vec3 LightPos_World;
 uniform vec3 LightColor;
@@ -194,7 +197,7 @@ vec3 microfacets_specular_brdf(
 	// Normal Distribution
 	float alpha = roughness * roughness;
 	float temp = alpha / max(0.0001, ((n_h*n_h) * (alpha*alpha-1) + 1));
-	float N = temp * temp * M_INV_PI;
+	float N = temp * temp * INVERSED_PI;
 	
 	//float N = normal_distrib(n_h, roughness);
 
@@ -232,9 +235,9 @@ void main() {
 
 	vec3 basecolor = srgb_to_linear(texture(Sampler_Basecolor, uv_Model).rgb);
 	
-	float metallic = texture(Sampler_Normal, uv_Model).r;
+	float metallic = texture(Sampler_Metallic, uv_Model).r;
 	
-	float roughness = max(0.01, texture(Sampler_Normal, uv_Model).r);	
+	float roughness = max(0.01, texture(Sampler_Roughness, uv_Model).r);	
 	
 	vec3 diffuse_color = basecolor * (1.0 - metallic);
 	vec3 specular_color = mix(dielectric_color, basecolor, metallic);
@@ -244,7 +247,7 @@ void main() {
 	vec3 point_to_camera = camera_pos_World - position_World;	
 	float point_to_light_length = length(LightPos_World - position_World);
 
-	vec3 out_diff = (diffuse_color*(vec3(1.0,1.0,1.0)-specular_color) * M_INV_PI);
+	vec3 out_diff = (diffuse_color*(vec3(1.0,1.0,1.0)-specular_color) * INVERSED_PI);
 	vec3 out_spec = microfacets_specular_brdf(
 		fixed_normal_World,
 		point_to_light,
@@ -257,7 +260,7 @@ void main() {
 
 	float falloff = 1.0/(1.0+0.1*point_to_light_length*point_to_light_length);
 
-	vec3 l = LightColor * (falloff * M_PI);
+	vec3 l = LightColor * (falloff * PI);
 	
 
 	vec3 out_color = linear_to_srgb(c * (out_diff + out_spec) * l);
@@ -265,14 +268,6 @@ void main() {
 	gl_FragColor = vec4(out_color, 1.0);
 
 };
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	
 	

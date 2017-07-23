@@ -56,6 +56,8 @@ public:
 
 	QOpenGLTexture* texture1_ = nullptr;
 	QOpenGLTexture* texture2_ = nullptr;
+	QOpenGLTexture* texture3_ = nullptr;
+	QOpenGLTexture* texture4_ = nullptr;
 
 	/**
 	ユーザーが書き換えたシェーダーをコンパイルして一時的にメンバーに格納する。
@@ -66,6 +68,9 @@ public:
 
 	bool model_changed_ = false;
 	QString model_uri_;
+
+	int8_t changed_tex_ = -1;
+	QString tex_uri_;
 
 	// エンティティ
 	ku::Scene scene_;
@@ -86,7 +91,6 @@ public:
 
 	QTimer timer_;
 
-
 	void initializeGL() override;
 
 	void resizeGL(const int w, const int h) override;
@@ -105,6 +109,9 @@ public:
 	void mousePressEvent(QMouseEvent* e) override;
 	void mouseReleaseEvent(QMouseEvent* e) override;
 	
-	QString shader_change(const QString& source);
+	QString change_shader(const QString& source);
+	
+	void change_texture(const uint8_t index, const QString& path);
+
 };
 

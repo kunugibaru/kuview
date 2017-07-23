@@ -69,6 +69,7 @@ void Kv_glwidget::initializeGL()
 	const auto& create_texture = [this](const char* texpath) -> QOpenGLTexture* {
 		
 		auto* texture = new QOpenGLTexture(QImage(texpath).mirrored());
+		texture->setFormat(QOpenGLTexture::RGBA8_UNorm);
 		texture->bind();
 		texture->setMagnificationFilter(QOpenGLTexture::Linear);
 		texture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
@@ -76,9 +77,11 @@ void Kv_glwidget::initializeGL()
 		return texture;
 	};
 
-	texture1_ = create_texture("D:/temps/tex.tga");
-	texture2_ = create_texture("D:/temps/tesnormal.tga");
-
+	texture1_ = create_texture("D:/temps/Default_basecolor.tga");
+	texture2_ = create_texture("D:/temps/Default_normal.tga");
+	texture3_ = create_texture("D:/temps/Default_Roughness.tga");
+	texture4_ = create_texture("D:/temps/Default_Metallic.tga");
+	
 	qInfo() << "GL widget initialized";
 }
 
@@ -104,6 +107,37 @@ void Kv_glwidget::paintGL()
 	if (model_changed_) {
 		swap_model(model_uri_.toStdString().c_str());
 		model_changed_ = false;
+	}
+
+	if (changed_tex_ != -1) {
+		gl->glActiveTexture(GL_TEXTURE0 + changed_tex_);
+		
+		const auto& setup_texture = [](QOpenGLTexture* tex) {
+			tex->bind();
+			tex->setFormat(QOpenGLTexture::RGBA8_UNorm);
+			tex->setMagnificationFilter(QOpenGLTexture::Linear);
+			tex->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
+			tex->setWrapMode(QOpenGLTexture::Repeat);
+		};
+		
+		if (changed_tex_ == 0) {
+			texture1_ = new QOpenGLTexture(QImage(tex_uri_).mirrored());
+			setup_texture(texture1_);
+		}
+		else if (changed_tex_ == 1) {
+			texture2_ = new QOpenGLTexture(QImage(tex_uri_).mirrored());
+			setup_texture(texture2_);
+		}
+		else if (changed_tex_ == 2) {
+			texture3_ = new QOpenGLTexture(QImage(tex_uri_).mirrored());
+			setup_texture(texture3_);
+		}
+		else if (changed_tex_ == 3) {
+			texture4_ = new QOpenGLTexture(QImage(tex_uri_).mirrored());
+			setup_texture(texture4_);
+		}
+		
+		changed_tex_ = -1;
 	}
 
 	handle_user_control();
@@ -138,6 +172,12 @@ void Kv_glwidget::paintGL()
 		gl->glActiveTexture(GL_TEXTURE1);
 		texture2_->bind();
 		gl->glUniform1i(program.uniformLocation("Sampler_Normal"), 1);
+		gl->glActiveTexture(GL_TEXTURE2);
+		texture3_->bind();
+		gl->glUniform1i(program.uniformLocation("Sampler_Roughness"), 2);
+		gl->glActiveTexture(GL_TEXTURE3);
+		texture4_->bind();
+		gl->glUniform1i(program.uniformLocation("Sampler_Metallic"), 3);
 	};
 
 	for (const auto& vattr : this->vert_buffers_) {
@@ -168,6 +208,8 @@ void Kv_glwidget::paintGL()
 
 	texture1_->release();
 	texture2_->release();
+	texture3_->release();
+	texture4_->release();
 }
 
 ku::Scene Kv_glwidget::swap_model(const char * uri)
@@ -281,7 +323,7 @@ void Kv_glwidget::mouseReleaseEvent(QMouseEvent * e)
 	this->is_left_mousebutton_pressed_ = false;
 }
 
-QString Kv_glwidget::shader_change(const QString& source)
+QString Kv_glwidget::change_shader(const QString& source)
 {
 	QOpenGLShader* shader = new QOpenGLShader{ QOpenGLShader::Fragment };
 	bool result = shader->compileSourceCode(source);
@@ -294,4 +336,10 @@ QString Kv_glwidget::shader_change(const QString& source)
 		return shader->log();
 	}
 
+}
+
+void Kv_glwidget::change_texture(const uint8_t index, const QString& path)
+{
+	tex_uri_ = path;
+	changed_tex_ = index;
 }

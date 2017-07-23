@@ -39,33 +39,43 @@
           </property>
          </widget>
         </item>
+        <item row="2" column="1">
+         <widget class="QLineEdit" name="le_basecolor"/>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>Basecolor Map</string>
+          </property>
+         </widget>
+        </item>
         <item row="4" column="1">
-         <widget class="QLineEdit" name="le_normal"/>
+         <widget class="QLineEdit" name="le_roughness"/>
         </item>
         <item row="4" column="0">
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>Specular Map</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QLineEdit" name="le_normal"/>
+        </item>
+        <item row="3" column="0">
          <widget class="QLabel" name="label_3">
           <property name="text">
            <string>Normal Map</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
-         <widget class="QLineEdit" name="le_diffuse"/>
+        <item row="5" column="1">
+         <widget class="QLineEdit" name="le_metallic"/>
         </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_4">
+        <item row="5" column="0">
+         <widget class="QLabel" name="label_6">
           <property name="text">
-           <string>Diffuse Map</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="QLineEdit" name="le_specular"/>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_5">
-          <property name="text">
-           <string>Specular Map</string>
+           <string>Metallic Map</string>
           </property>
          </widget>
         </item>

@@ -41,12 +41,14 @@ public:
     QFormLayout *formLayout_2;
     QLineEdit *le_modeluri;
     QLabel *label_2;
+    QLineEdit *le_basecolor;
+    QLabel *label_4;
+    QLineEdit *le_roughness;
+    QLabel *label_5;
     QLineEdit *le_normal;
     QLabel *label_3;
-    QLineEdit *le_diffuse;
-    QLabel *label_4;
-    QLineEdit *le_specular;
-    QLabel *label_5;
+    QLineEdit *le_metallic;
+    QLabel *label_6;
     QTableView *tv_modelinfo;
     QPlainTextEdit *te_log;
     QFormLayout *formLayout;
@@ -92,35 +94,45 @@ public:
 
         formLayout_2->setWidget(1, QFormLayout::LabelRole, label_2);
 
-        le_normal = new QLineEdit(centralWidget);
-        le_normal->setObjectName(QStringLiteral("le_normal"));
+        le_basecolor = new QLineEdit(centralWidget);
+        le_basecolor->setObjectName(QStringLiteral("le_basecolor"));
 
-        formLayout_2->setWidget(4, QFormLayout::FieldRole, le_normal);
-
-        label_3 = new QLabel(centralWidget);
-        label_3->setObjectName(QStringLiteral("label_3"));
-
-        formLayout_2->setWidget(4, QFormLayout::LabelRole, label_3);
-
-        le_diffuse = new QLineEdit(centralWidget);
-        le_diffuse->setObjectName(QStringLiteral("le_diffuse"));
-
-        formLayout_2->setWidget(2, QFormLayout::FieldRole, le_diffuse);
+        formLayout_2->setWidget(2, QFormLayout::FieldRole, le_basecolor);
 
         label_4 = new QLabel(centralWidget);
         label_4->setObjectName(QStringLiteral("label_4"));
 
         formLayout_2->setWidget(2, QFormLayout::LabelRole, label_4);
 
-        le_specular = new QLineEdit(centralWidget);
-        le_specular->setObjectName(QStringLiteral("le_specular"));
+        le_roughness = new QLineEdit(centralWidget);
+        le_roughness->setObjectName(QStringLiteral("le_roughness"));
 
-        formLayout_2->setWidget(3, QFormLayout::FieldRole, le_specular);
+        formLayout_2->setWidget(4, QFormLayout::FieldRole, le_roughness);
 
         label_5 = new QLabel(centralWidget);
         label_5->setObjectName(QStringLiteral("label_5"));
 
-        formLayout_2->setWidget(3, QFormLayout::LabelRole, label_5);
+        formLayout_2->setWidget(4, QFormLayout::LabelRole, label_5);
+
+        le_normal = new QLineEdit(centralWidget);
+        le_normal->setObjectName(QStringLiteral("le_normal"));
+
+        formLayout_2->setWidget(3, QFormLayout::FieldRole, le_normal);
+
+        label_3 = new QLabel(centralWidget);
+        label_3->setObjectName(QStringLiteral("label_3"));
+
+        formLayout_2->setWidget(3, QFormLayout::LabelRole, label_3);
+
+        le_metallic = new QLineEdit(centralWidget);
+        le_metallic->setObjectName(QStringLiteral("le_metallic"));
+
+        formLayout_2->setWidget(5, QFormLayout::FieldRole, le_metallic);
+
+        label_6 = new QLabel(centralWidget);
+        label_6->setObjectName(QStringLiteral("label_6"));
+
+        formLayout_2->setWidget(5, QFormLayout::LabelRole, label_6);
 
 
         verticalLayout->addLayout(formLayout_2);
@@ -197,9 +209,10 @@ public:
     {
         kuviewClass->setWindowTitle(QApplication::translate("kuviewClass", "kuview", Q_NULLPTR));
         label_2->setText(QApplication::translate("kuviewClass", "Model Path", Q_NULLPTR));
-        label_3->setText(QApplication::translate("kuviewClass", "Normal Map", Q_NULLPTR));
-        label_4->setText(QApplication::translate("kuviewClass", "Diffuse Map", Q_NULLPTR));
+        label_4->setText(QApplication::translate("kuviewClass", "Basecolor Map", Q_NULLPTR));
         label_5->setText(QApplication::translate("kuviewClass", "Specular Map", Q_NULLPTR));
+        label_3->setText(QApplication::translate("kuviewClass", "Normal Map", Q_NULLPTR));
+        label_6->setText(QApplication::translate("kuviewClass", "Metallic Map", Q_NULLPTR));
         lbl_intensity->setText(QApplication::translate("kuviewClass", "Light Intensity", Q_NULLPTR));
         label->setText(QApplication::translate("kuviewClass", "Ambient(x0.01)", Q_NULLPTR));
     } // retranslateUi

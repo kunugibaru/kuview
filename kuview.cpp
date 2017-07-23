@@ -41,10 +41,48 @@ kuview::kuview(QWidget *parent)
 		[this]() {
 		
 		const QString& log = 
-			ui.glw_main->shader_change(ui.te_fs->toPlainText().toStdString().c_str());
+			ui.glw_main->change_shader(ui.te_fs->toPlainText().toStdString().c_str());
 		
 		this->ui.te_log->setPlainText(log);
 	});
+
+	connect(
+		ui.le_basecolor, &QLineEdit::textChanged,
+		[this](const QString& uri) {
+		
+		QFileInfo f(uri);
+		if (f.exists()) {
+			ui.glw_main->change_texture(0, uri);
+		}
+	});
+	connect(
+		ui.le_normal, &QLineEdit::textChanged,
+		[this](const QString& uri) {
+
+		QFileInfo f(uri);
+		if (f.exists()) {
+			ui.glw_main->change_texture(1, uri);
+		}
+	});
+	connect(
+		ui.le_roughness, &QLineEdit::textChanged,
+		[this](const QString& uri) {
+
+		QFileInfo f(uri);
+		if (f.exists()) {
+			ui.glw_main->change_texture(2, uri);
+		}
+	});
+	connect(
+		ui.le_metallic, &QLineEdit::textChanged,
+		[this](const QString& uri) {
+
+		QFileInfo f(uri);
+		if (f.exists()) {
+			ui.glw_main->change_texture(3, uri);
+		}
+	});
+
 	this->ui.te_fs->setPlainText(ku::normal_fs);
 }
 
