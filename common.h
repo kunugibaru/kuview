@@ -125,7 +125,6 @@ void main()
 	static const char* normal_fs = R"(#version 410
 
 #define M_INV_PI 0.31830988618379067153776752674503
-#define M_INV_LOG2 1.4426950408889634073599246810019
 #define M_PI 3.1415926535897932384626433832795
 #define DISTANCE_ATTENUATION_MULT 0.001
 
@@ -161,72 +160,53 @@ vec3 srgb_to_linear(vec3 c)
 	return pow(c, vec3(2.2, 2.2, 2.2));
 }
 
-vec3 linerar_to_srgb(vec3 c)
+vec3 linear_to_srgb(vec3 c)
 {
 	return pow(c, vec3(0.4545, 0.4545, 0.4545));
 }
 
-float G1(
-	float ndw, // w is either Ln or Vn
-	float k)
+float g1(vec3 n, vec3 v, float k)
 {
-// One generic factor of the geometry function divided by ndw
-// NB : We should have k > 0
-	return 1.0 / ( ndw*(1.0-k) + k );
+	float n_v = dot(n, v);
+	return n_v / n_v * (1-k) + k;
 }
 
-float visibility(
-	float ndl,
-	float ndv,
-	float Roughness)
-{
-// Schlick with Smith-like choice of k
-// cf http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf p3
-// visibility is a Cook-Torrance geometry function divided by (n.l)*(n.v)
-	float k = Roughness * Roughness * 0.5;
-	return G1(ndl,k)*G1(ndv,k);
-}
 
-float normal_distrib(
-	float ndh,
-	float Roughness)
+vec3 microfacets_specular_brdf(
+	vec3 n,
+	vec3 l,
+	vec3 v,
+	vec3 spec, // Ks
+	float roughness
+)
 {
-// use GGX / Trowbridge-Reitz, same as Disney and Unreal 4
-// cf http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf p3
-	float alpha = Roughness * Roughness;
-	float tmp = alpha / max(1e-8,(ndh*ndh*(alpha*alpha-1.0)+1.0));
-	return tmp * tmp * M_INV_PI;
-}
+	vec3 h = normalize(v + n);
+	float v_h = max(0, dot(v, h));
+	float n_h = max(0, dot(n, h));
+	float n_l = max(0, dot(n, l));
+	float n_v = max(0, dot(n, v));
+	
+	// Geometric Attenuation
+	//float D = visibility(n_l, n_v, roughness);
+	float k = (roughness + 1) * (roughness + 1) / 8;
+	float D = g1(n, l, k) * g1(n, v, k);
 
-vec3 fresnel(
-	float vdh,
-	vec3 F0)
-{
-// Schlick with Spherical Gaussian approximation
-// cf http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf p3
-	float sphg = pow(2.0, (-5.55473*vdh - 6.98316) * vdh);
-	return F0 + (vec3(1.0, 1.0, 1.0) - F0) * sphg;
-}
+	// Normal Distribution
+	float alpha = roughness * roughness;
+	float temp = alpha / max(0.0001, ((n_h*n_h) * (alpha*alpha-1) + 1));
+	float N = temp * temp * M_INV_PI;
+	
+	//float N = normal_distrib(n_h, roughness);
 
-vec3 microfacets_brdf(
-	vec3 Nn,
-	vec3 Ln,
-	vec3 Vn,
-	vec3 Ks,
-	float Roughness)
-{
-	vec3 Hn = normalize(Vn + Ln);
-	float vdh = max( 0.0, dot(Vn, Hn) );
-	float ndh = max( 0.0, dot(Nn, Hn) );
-	float ndl = max( 0.0, dot(Nn, Ln) );
-	float ndv = max( 0.0, dot(Nn, Vn) );
-	return fresnel(vdh,Ks) *
-		( normal_distrib(ndh,Roughness) * visibility(ndl,ndv,Roughness) / 4.0 );
-}
+	// Fresnel
+	vec3 F0 = spec;
+	vec3 F = F0 + (vec3(1.0, 1.0, 1.0) - F0) * pow(2.0, (-5.55473 * v_h - 6.9816) * v_h);
+	
+	//vec3 F = fresnel(v_h,spec);
 
-float lampAttenuation(float distance)
-{
-	return 1.0/(1.0+DISTANCE_ATTENUATION_MULT*distance*distance);
+	float denom = 4;
+
+	return D * N * F / denom;
 }
 
 void main() {
@@ -248,23 +228,24 @@ void main() {
 	);
 	}
 	
-	vec3 dielectric_color = vec3(1,1,1);
+	vec3 dielectric_color = vec3(0.1, 0.1,0.1);
 
 	vec3 basecolor = srgb_to_linear(texture(Sampler_Basecolor, uv_Model).rgb);
 	
 	float metallic = texture(Sampler_Normal, uv_Model).r;
+	
 	float roughness = max(0.01, texture(Sampler_Normal, uv_Model).r);	
-
+	
 	vec3 diffuse_color = basecolor * (1.0 - metallic);
 	vec3 specular_color = mix(dielectric_color, basecolor, metallic);
-
+	
 	vec3 point_to_light = LightPos_World - position_World;
 	vec3 camera_pos_World = inverse(V)[3].xyz;
 	vec3 point_to_camera = camera_pos_World - position_World;	
 	float point_to_light_length = length(LightPos_World - position_World);
 
 	vec3 out_diff = (diffuse_color*(vec3(1.0,1.0,1.0)-specular_color) * M_INV_PI);
-	vec3 out_spec = microfacets_brdf(
+	vec3 out_spec = microfacets_specular_brdf(
 		fixed_normal_World,
 		point_to_light,
 		point_to_camera,
@@ -274,13 +255,24 @@ void main() {
 	
 	float c = max(dot(fixed_normal_World, point_to_light), 0.0);
 
-	vec3 l = LightColor * (lampAttenuation(point_to_light_length) * M_PI);
+	float falloff = 1.0/(1.0+0.1*point_to_light_length*point_to_light_length);
 
-	vec3 out_color = c * (out_diff + out_spec) * l;
+	vec3 l = LightColor * (falloff * M_PI);
+	
+
+	vec3 out_color = linear_to_srgb(c * (out_diff + out_spec) * l);
 
 	gl_FragColor = vec4(out_color, 1.0);
 
 };
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
