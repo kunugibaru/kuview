@@ -89,7 +89,7 @@ kuview::kuview(QWidget *parent)
 void kuview::showEvent(QShowEvent * e)
 {
 	ku::Scene scene
-		= ui.glw_main->swap_model(":/kuview/Resources/sphere.obj");
+		= ui.glw_main->swap_model(":/kuview/Resources/box.obj");
 	sceneinfo_model_->change_model(scene);
 
 	QMainWindow::showEvent(e);

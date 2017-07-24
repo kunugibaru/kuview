@@ -77,10 +77,10 @@ void Kv_glwidget::initializeGL()
 		return texture;
 	};
 
-	texture1_ = create_texture("D:/temps/Default_basecolor.tga");
-	texture2_ = create_texture("D:/temps/Default_normal.tga");
-	texture3_ = create_texture("D:/temps/Default_Roughness.tga");
-	texture4_ = create_texture("D:/temps/Default_Metallic.tga");
+	texture1_ = create_texture(":/kuview/Resources/Default_basecolor.tga");
+	texture2_ = create_texture(":/kuview/Resources/Default_normal.tga");
+	texture3_ = create_texture(":/kuview/Resources/Default_roughness.tga");
+	texture4_ = create_texture(":/kuview/Resources/Default_metallic.tga");
 	
 	qInfo() << "GL widget initialized";
 }
@@ -101,7 +101,6 @@ void Kv_glwidget::paintGL()
 		normalbuffer_program_.link();
 		fs_changed_ = false;
 
-		qInfo() << "he";
 	}
 
 	if (model_changed_) {
@@ -112,9 +111,9 @@ void Kv_glwidget::paintGL()
 	if (changed_tex_ != -1) {
 		gl->glActiveTexture(GL_TEXTURE0 + changed_tex_);
 		
-		const auto& setup_texture = [](QOpenGLTexture* tex) {
+		const auto& setup_texture = [](QOpenGLTexture* tex, const QOpenGLTexture::TextureFormat& tf) {
 			tex->bind();
-			tex->setFormat(QOpenGLTexture::RGBA8_UNorm);
+			tex->setFormat(tf);
 			tex->setMagnificationFilter(QOpenGLTexture::Linear);
 			tex->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
 			tex->setWrapMode(QOpenGLTexture::Repeat);
@@ -122,19 +121,19 @@ void Kv_glwidget::paintGL()
 		
 		if (changed_tex_ == 0) {
 			texture1_ = new QOpenGLTexture(QImage(tex_uri_).mirrored());
-			setup_texture(texture1_);
+			setup_texture(texture1_, QOpenGLTexture::RGBA8_UNorm);
 		}
 		else if (changed_tex_ == 1) {
 			texture2_ = new QOpenGLTexture(QImage(tex_uri_).mirrored());
-			setup_texture(texture2_);
+			setup_texture(texture2_, QOpenGLTexture::RGBA8_UNorm);
 		}
 		else if (changed_tex_ == 2) {
 			texture3_ = new QOpenGLTexture(QImage(tex_uri_).mirrored());
-			setup_texture(texture3_);
+			setup_texture(texture3_, QOpenGLTexture::R8_UNorm);
 		}
 		else if (changed_tex_ == 3) {
 			texture4_ = new QOpenGLTexture(QImage(tex_uri_).mirrored());
-			setup_texture(texture4_);
+			setup_texture(texture4_, QOpenGLTexture::R8_UNorm);
 		}
 		
 		changed_tex_ = -1;

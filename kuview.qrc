@@ -2,5 +2,10 @@
     <qresource prefix="/kuview">
         <file>Resources/machine_01.obj</file>
         <file>Resources/sphere.obj</file>
+        <file>Resources/Default_basecolor.tga</file>
+        <file>Resources/Default_metallic.tga</file>
+        <file>Resources/Default_normal.tga</file>
+        <file>Resources/Default_roughness.tga</file>
+        <file>Resources/box.obj</file>
     </qresource>
 </RCC>
