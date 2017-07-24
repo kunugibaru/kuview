@@ -256,7 +256,7 @@ void main() {
 
 	float falloff = 1.0/(1.0+0.1*point_to_light_length*point_to_light_length);
 
-	vec3 l = LightColor * (falloff * PI);
+	vec3 l = LightColor * (falloff * PI) * (LightPower * 0.1);
 	
 
 	vec3 out_color = linear_to_srgb(c * (out_diff + out_spec) * l);
