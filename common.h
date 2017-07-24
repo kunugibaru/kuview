@@ -175,7 +175,7 @@ float g1(vec3 n, vec3 v, float k)
 }
 
 
-vec3 microfacets_specular_brdf(
+float microfacets_specular_brdf(
 	vec3 n,
 	vec3 l,
 	vec3 v,
@@ -184,32 +184,26 @@ vec3 microfacets_specular_brdf(
 )
 {
 	vec3 h = normalize(v + n);
-	float v_h = max(0, dot(v, h));
-	float n_h = max(0, dot(n, h));
-	float n_l = max(0, dot(n, l));
-	float n_v = max(0, dot(n, v));
-	
-	// Geometric Attenuation
-	//float D = visibility(n_l, n_v, roughness);
-	float k = (roughness + 1) * (roughness + 1) / 8;
-	float D = g1(n, l, k) * g1(n, v, k);
+	float v_h = max(0.001, dot(v, h));
+	float n_h = max(0.001, dot(n, h));
+	float n_l = max(0.001, dot(n, l));
+	float n_v = max(0.001, dot(n, v));
 
 	// Normal Distribution
 	float alpha = roughness * roughness;
 	float temp = alpha / max(0.0001, ((n_h*n_h) * (alpha*alpha-1) + 1));
-	float N = temp * temp * INVERSED_PI;
+	float D = temp * temp * INVERSED_PI;
 	
-	//float N = normal_distrib(n_h, roughness);
+	// Geometric Attenuation
+	float k = (roughness + 1) * (roughness + 1) / 8;
+	float G = g1(n, l, k) * g1(n, v, k);
+	
 
 	// Fresnel
-	vec3 F0 = spec;
-	vec3 F = F0 + (vec3(1.0, 1.0, 1.0) - F0) * pow(2.0, (-5.55473 * v_h - 6.9816) * v_h);
-	
-	//vec3 F = fresnel(v_h,spec);
+	float F0 = spec.r;
+	float F = F0 + (1.0 - F0) * pow(2.0, (-5.55473 * v_h - 6.9816) * v_h);
 
-	float denom = 4;
-
-	return D * N * F / denom;
+	return D * G * F / (4 * n_l * n_v);
 }
 
 void main() {
@@ -248,13 +242,15 @@ void main() {
 	float point_to_light_length = length(LightPos_World - position_World);
 
 	vec3 out_diff = (diffuse_color*(vec3(1.0,1.0,1.0)-specular_color) * INVERSED_PI);
-	vec3 out_spec = microfacets_specular_brdf(
+	float sbrdf = microfacets_specular_brdf(
 		fixed_normal_World,
 		point_to_light,
 		point_to_camera,
 		specular_color,
 		roughness
 	);
+	
+	vec3 out_spec = vec3(sbrdf, sbrdf, sbrdf);
 	
 	float c = max(dot(fixed_normal_World, point_to_light), 0.0);
 
