@@ -7,5 +7,10 @@
         <file>Resources/Default_normal.tga</file>
         <file>Resources/Default_roughness.tga</file>
         <file>Resources/box.obj</file>
+        <file>Resources/M_Chair_01_basecolor.tga</file>
+        <file>Resources/M_Chair_01_normal.tga</file>
+        <file>Resources/M_Chair_01_roughness.tga</file>
+        <file>Resources/M_Chair_01_metallic.tga</file>
+        <file>Resources/chair.obj</file>
     </qresource>
 </RCC>

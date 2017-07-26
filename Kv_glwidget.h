@@ -12,8 +12,6 @@ namespace ku
 		ShaderCompilationError() : std::exception("") {}
 		ShaderCompilationError(const char* msg) : std::exception(msg) {}
 	};
-
-	
 }
 
 
@@ -63,13 +61,13 @@ public:
 	ユーザーが書き換えたシェーダーをコンパイルして一時的にメンバーに格納する。
 	メインスレッドでリンクする。
 	*/
-	bool fs_changed_ = false;
+	std::atomic<bool> fs_changed_ = false;
 	QOpenGLShader* user_fs_;
 
-	bool model_changed_ = false;
+	std::atomic<bool> model_changed_ = false;
 	QString model_uri_;
 
-	int8_t changed_tex_ = -1;
+	std::atomic<int8_t> changed_tex_ = -1;
 	QString tex_uri_;
 
 	// エンティティ
@@ -109,6 +107,11 @@ public:
 	void mousePressEvent(QMouseEvent* e) override;
 	void mouseReleaseEvent(QMouseEvent* e) override;
 	
+	/**
+	以下の関数は別スレッドから実行される。
+	(直接 OpenGL コンテキストを操作してはいけない。)
+	*/
+
 	QString change_shader(const QString& source);
 	
 	void change_texture(const uint8_t index, const QString& path);

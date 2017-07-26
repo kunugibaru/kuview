@@ -28,3 +28,5 @@
 #include <exception>
 #include <functional>
 #include <memory>
+#include <atomic>
+#include <fstream>

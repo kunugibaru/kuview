@@ -124,7 +124,7 @@ void main()
 }
 )";
 
-	static const char* normal_fs = R"(#version 410
+	static const char* user_editable_fs = R"(#version 410
 
 #define INVERSED_PI 0.3183
 #define PI 3.1415
@@ -290,4 +290,79 @@ void main() {
 	};
 
 	Scene read_scene(const char * uri);
+
+	class Not_compatible_image_type_error : public std::exception
+	{
+	public:
+		Not_compatible_image_type_error(const char* msg)
+			: std::exception(msg) {}
+	};
+
+	struct Targa_image
+	{
+		uint16_t width_ = 0;
+		uint16_t height_ = 0;
+		std::vector<char> data_;
+	};
+
+	/**
+	Qt が上手くグレイスケール Tga を読み込んでくれないので、
+	グレイスケールのみ読み込む Tga パーサー。
+	グレイスケールでないとき、Not_compatible_image_type_error を送出する。
+
+	@throws  Not_compatible_image_type_error
+	*/
+	static Targa_image read_targa(std::ifstream& ifst)
+	{
+		char id_filed_length = 0;
+		ifst.read(&id_filed_length, 1);
+
+		ifst.seekg(2);
+		char image_type = 0;
+		ifst.read(&image_type, 1);
+
+		if (static_cast<int>(image_type) != 3) {
+			// grayscale のみサポートする。
+			throw Not_compatible_image_type_error("Image type not supported");
+		}
+
+		ifst.seekg(12);
+
+		Targa_image tga;
+		ifst.read(reinterpret_cast<char*>(&tga.width_), 2);
+		ifst.read(reinterpret_cast<char*>(&tga.height_), 2);
+
+		ifst.seekg(18 + id_filed_length);
+
+		const auto datasize = tga.width_ * tga.height_;
+
+		tga.data_.resize(datasize);
+		ifst.read(tga.data_.data(), datasize);
+		ifst.seekg(int(ifst.tellg()) + 8);
+
+		static const char* kTruevisionXFile = "TRUEVISION-XFILE";
+		char buff[sizeof(kTruevisionXFile)];
+
+		ifst.read(buff, sizeof(kTruevisionXFile));
+
+		if (strstr(buff, kTruevisionXFile) != 0) {
+			throw Not_compatible_image_type_error("Image datasize ");
+		}
+
+		return tga;
+	}
+
+	static QImage* read_targa(const char* targa_path)
+	{
+		const auto& tga = read_targa(std::ifstream(targa_path, std::ios::binary));
+
+		QImage* img = new QImage((const uchar*)tga.data_.data(), tga.width_, tga.height_, QImage::Format_Grayscale8);
+
+		//img->loadFromData((const uchar*)tga.data_.data(), QImage::Format_Grayscale8);
+		qInfo() << img->size();
+
+
+
+		return img;
+	}
 }

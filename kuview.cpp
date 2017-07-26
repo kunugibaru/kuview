@@ -83,13 +83,13 @@ kuview::kuview(QWidget *parent)
 		}
 	});
 
-	this->ui.te_fs->setPlainText(ku::normal_fs);
+	this->ui.te_fs->setPlainText(ku::user_editable_fs);
 }
 
 void kuview::showEvent(QShowEvent * e)
 {
 	ku::Scene scene
-		= ui.glw_main->swap_model(":/kuview/Resources/box.obj");
+		= ui.glw_main->swap_model(":/kuview/Resources/chair.obj");
 	sceneinfo_model_->change_model(scene);
 
 	QMainWindow::showEvent(e);

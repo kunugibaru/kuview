@@ -55,7 +55,7 @@
         <item row="4" column="0">
          <widget class="QLabel" name="label_5">
           <property name="text">
-           <string>Specular Map</string>
+           <string>Roughness Map</string>
           </property>
          </widget>
         </item>
@@ -175,6 +175,18 @@
    <header>kv_glwidget.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>le_modeluri</tabstop>
+  <tabstop>le_basecolor</tabstop>
+  <tabstop>le_normal</tabstop>
+  <tabstop>le_roughness</tabstop>
+  <tabstop>le_metallic</tabstop>
+  <tabstop>sb_intensity</tabstop>
+  <tabstop>sb_ambient</tabstop>
+  <tabstop>tv_modelinfo</tabstop>
+  <tabstop>te_log</tabstop>
+  <tabstop>te_fs</tabstop>
+ </tabstops>
  <resources>
   <include location="kuview.qrc"/>
  </resources>

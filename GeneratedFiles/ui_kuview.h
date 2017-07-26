@@ -199,6 +199,15 @@ public:
         statusBar = new QStatusBar(kuviewClass);
         statusBar->setObjectName(QStringLiteral("statusBar"));
         kuviewClass->setStatusBar(statusBar);
+        QWidget::setTabOrder(le_modeluri, le_basecolor);
+        QWidget::setTabOrder(le_basecolor, le_normal);
+        QWidget::setTabOrder(le_normal, le_roughness);
+        QWidget::setTabOrder(le_roughness, le_metallic);
+        QWidget::setTabOrder(le_metallic, sb_intensity);
+        QWidget::setTabOrder(sb_intensity, sb_ambient);
+        QWidget::setTabOrder(sb_ambient, tv_modelinfo);
+        QWidget::setTabOrder(tv_modelinfo, te_log);
+        QWidget::setTabOrder(te_log, te_fs);
 
         retranslateUi(kuviewClass);
 
@@ -210,7 +219,7 @@ public:
         kuviewClass->setWindowTitle(QApplication::translate("kuviewClass", "kuview", Q_NULLPTR));
         label_2->setText(QApplication::translate("kuviewClass", "Model Path", Q_NULLPTR));
         label_4->setText(QApplication::translate("kuviewClass", "Basecolor Map", Q_NULLPTR));
-        label_5->setText(QApplication::translate("kuviewClass", "Specular Map", Q_NULLPTR));
+        label_5->setText(QApplication::translate("kuviewClass", "Roughness Map", Q_NULLPTR));
         label_3->setText(QApplication::translate("kuviewClass", "Normal Map", Q_NULLPTR));
         label_6->setText(QApplication::translate("kuviewClass", "Metallic Map", Q_NULLPTR));
         lbl_intensity->setText(QApplication::translate("kuviewClass", "Light Intensity", Q_NULLPTR));

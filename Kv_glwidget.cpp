@@ -1,12 +1,6 @@
 #include "stdafx.h"
 #include "Kv_glwidget.h"
 
-namespace ku
-{
-
-}
-
-
 
 Kv_glwidget::Kv_glwidget(QWidget* parent = nullptr)
 {
@@ -61,10 +55,7 @@ void Kv_glwidget::initializeGL()
 	};
 	
 	make_shader(program_, ku::basic_vs, ku::basic_fs);
-	make_shader(normalbuffer_program_, ku::basic_vs, ku::normal_fs);
-
-	//normalbuffer_program_.addShaderFromSourceCode(QOpenGLShader::Fragment, basic_fs);
-	//normalbuffer_program_.link();
+	make_shader(normalbuffer_program_, ku::basic_vs, ku::user_editable_fs);
 
 	const auto& create_texture = [this](const char* texpath) -> QOpenGLTexture* {
 		
@@ -77,10 +68,10 @@ void Kv_glwidget::initializeGL()
 		return texture;
 	};
 
-	texture1_ = create_texture(":/kuview/Resources/Default_basecolor.tga");
-	texture2_ = create_texture(":/kuview/Resources/Default_normal.tga");
-	texture3_ = create_texture(":/kuview/Resources/Default_roughness.tga");
-	texture4_ = create_texture(":/kuview/Resources/Default_metallic.tga");
+	texture1_ = create_texture(":/kuview/Resources/M_Chair_01_basecolor.tga");
+	texture2_ = create_texture(":/kuview/Resources/M_Chair_01_normal.tga");
+	texture3_ = create_texture(":/kuview/Resources/M_Chair_01_basecolor.tga");
+	texture4_ = create_texture(":/kuview/Resources/M_Chair_01_metallic.tga");
 	
 	qInfo() << "GL widget initialized";
 }
@@ -109,31 +100,48 @@ void Kv_glwidget::paintGL()
 	}
 
 	if (changed_tex_ != -1) {
+		// changed_tex_ の番号に応じてテクスチャー画像を更新する。
+		// Qt がグレイスケール Tga を読み込まないので、
+		// ku::read_targa() でまずグレイスケールとして読み込み、
+		// RGB であった場合例外処理として QImage で読み込む。
+		
 		gl->glActiveTexture(GL_TEXTURE0 + changed_tex_);
 		
-		const auto& setup_texture = [](QOpenGLTexture* tex, const QOpenGLTexture::TextureFormat& tf) {
+		static const auto& setup_texture = [](QOpenGLTexture* tex, const QOpenGLTexture::TextureFormat& tf) {
 			tex->bind();
 			tex->setFormat(tf);
 			tex->setMagnificationFilter(QOpenGLTexture::Linear);
 			tex->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
 			tex->setWrapMode(QOpenGLTexture::Repeat);
 		};
+
+		static const auto& load_image_as = [&](const char* tex_uri) -> QOpenGLTexture* {
+			QOpenGLTexture* out_tex;
+			try {
+				// Grayscale
+				const auto& img = ku::read_targa(tex_uri);
+				out_tex = new QOpenGLTexture(img->mirrored());
+				setup_texture(out_tex, QOpenGLTexture::R8_UNorm);
+			}
+			catch (ku::Not_compatible_image_type_error) {
+				// R8B8G8
+				out_tex = new QOpenGLTexture(QImage(tex_uri).mirrored());
+				setup_texture(out_tex, QOpenGLTexture::RGBA8_UNorm);
+			}
+			return out_tex;
+		};
 		
 		if (changed_tex_ == 0) {
-			texture1_ = new QOpenGLTexture(QImage(tex_uri_).mirrored());
-			setup_texture(texture1_, QOpenGLTexture::RGBA8_UNorm);
+			texture1_ = load_image_as(tex_uri_.toStdString().c_str());
 		}
 		else if (changed_tex_ == 1) {
-			texture2_ = new QOpenGLTexture(QImage(tex_uri_).mirrored());
-			setup_texture(texture2_, QOpenGLTexture::RGBA8_UNorm);
+			texture2_ = load_image_as(tex_uri_.toStdString().c_str());
 		}
 		else if (changed_tex_ == 2) {
-			texture3_ = new QOpenGLTexture(QImage(tex_uri_).mirrored());
-			setup_texture(texture3_, QOpenGLTexture::R8_UNorm);
+			texture3_ = load_image_as(tex_uri_.toStdString().c_str());
 		}
 		else if (changed_tex_ == 3) {
-			texture4_ = new QOpenGLTexture(QImage(tex_uri_).mirrored());
-			setup_texture(texture4_, QOpenGLTexture::R8_UNorm);
+			texture4_ = load_image_as(tex_uri_.toStdString().c_str());
 		}
 		
 		changed_tex_ = -1;
