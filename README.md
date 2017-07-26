@@ -25,6 +25,6 @@ Visual Studio 2017 Community でビルドを確認しています。
 * glsls.h ファイルにデフォルトの glsl を記載しています。
 * 名前規則は C++ Core Guidelines, Google C++ Styleguide を参考にしています。
 
-[Cpp Core Guidelines]("https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md")
+[Cpp Core Guidelines](https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md)
 
-[Google C++ Style Guide]("https://google.github.io/styleguide/cppguide.html")
+[Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
