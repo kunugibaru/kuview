@@ -2,6 +2,8 @@
 
 フラグメントシェーダーをユーザーが自由に編集できる 3D ビューアーです。
 
+![Screen capture](Resource/kuview_screenshot01.PNG)
+
 ## 依存関係
 
 ビルドには Qt5, Assimp が必要です。
@@ -28,3 +30,4 @@ Visual Studio 2017 Community でビルドを確認しています。
 [Cpp Core Guidelines](https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md)
 
 [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
+
