@@ -2,7 +2,7 @@
 
 フラグメントシェーダーをユーザーが自由に編集できる 3D ビューアーです。
 
-![Screen capture](Resource/kuview_screenshot01.PNG)
+![Screen capture](https://raw.githubusercontent.com/kunugibaru/kuview/master/Resources/kuview_screenshot01.PNG)
 
 ## 依存関係
 
