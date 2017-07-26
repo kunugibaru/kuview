@@ -39,7 +39,7 @@ namespace ku
 
 		void rotate_around_target(const float& angle);
 
-		void focus_origin();
+		void focus_on(const QVector3D& target);
 
 		void update();
 

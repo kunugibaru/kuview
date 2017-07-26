@@ -42,14 +42,14 @@ QVector3D ku::Camera::down() const
 	return - this->up();
 }
 
-void ku::Camera::translate(const QVector3D & angle)
+void ku::Camera::translate(const QVector3D& angle)
 {
 	//qInfo() << dir;
 	this->pos_ += angle * pan_speed_;
 	this->target_ += angle * pan_speed_;
 }
 
-void ku::Camera::rotate_around_target(const float & angle)
+void ku::Camera::rotate_around_target(const float& angle)
 {
 	const QVector3D& old_dir = this->target_ - this->pos_;
 	const QVector3D& new_dir = QQuaternion::fromAxisAndAngle(QVector3D(0, 1, 0), angle).rotatedVector(old_dir);
@@ -57,9 +57,9 @@ void ku::Camera::rotate_around_target(const float & angle)
 	this->recalculate_up();
 }
 
-void ku::Camera::focus_origin()
+void ku::Camera::focus_on(const QVector3D& target)
 {
-	this->target_ = QVector3D(0, 0, 0);
+	this->target_ = target;
 	recalculate_up();
 }
 

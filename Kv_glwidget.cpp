@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Kv_glwidget.h"
+#include "glsls.h"
 
 
 Kv_glwidget::Kv_glwidget(QWidget* parent = nullptr)
@@ -290,7 +291,7 @@ void Kv_glwidget::handle_user_control()
 			camera_.translate(camera_.back());
 			break;
 		case Qt::Key_F:
-			camera_.focus_origin();
+			camera_.focus_on(ku::calc_bbox(scene_).calculate_centroid());
 			break;
 		case Qt::Key_Q:
 			camera_.translate(camera_.down());

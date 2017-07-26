@@ -101,6 +101,7 @@
   <ItemGroup>
     <ClInclude Include="common.h" />
     <ClInclude Include="GeneratedFiles\ui_kuview.h" />
+    <ClInclude Include="glsls.h" />
     <ClInclude Include="Kv_camera.h" />
     <ClInclude Include="Kv_glwidget.h" />
     <CustomBuild Include="kuview.h">

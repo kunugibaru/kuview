@@ -80,6 +80,9 @@
     <ClInclude Include="Kv_sceneinfo_model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="glsls.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="kuview.ui">
